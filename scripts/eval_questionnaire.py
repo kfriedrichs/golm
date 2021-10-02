@@ -5,7 +5,7 @@ Author:
 Evaluation skript to bachelor thesis:
 	"Modeling collaborative reference in a Pentomino domain using the GOLMI framework"
 Usage:
-	python eval_questionnaire.py
+	python3 eval_questionnaire.py
 """
 
 import os

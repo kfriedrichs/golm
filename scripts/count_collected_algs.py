@@ -5,7 +5,7 @@ Author:
 Skript to bachelor thesis:
 	"Modeling collaborative reference in a Pentomino domain using the GOLMI framework"
 Usage:
-	python eval_log.py
+	python3 count_collected_algs.py
 """
 
 import os

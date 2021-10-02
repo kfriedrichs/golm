@@ -5,21 +5,12 @@ Author:
 Skript to bachelor thesis:
 	"Modeling collaborative reference in a Pentomino domain using the GOLMI framework"
 Usage:
-	python eval_log.py
+	python3 create_instr_audio.py [-h] -f FILE -o OUT_DIR
 """
 import argparse
 from boto3 import Session
 from contextlib import closing
 import os
-
-# Define Polly parameters (set using 'export PROFILE=profilename')
-profile_name = os.getenv('PROFILE')
-if not profile_name:
-	print("Specify polly profile using 'export PROFILE=profilename'")
-	print("You need to set up an AWS configuration, see: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html")
-	exit()
-session = Session(profile_name=profile_name)
-polly = session.client("polly")
 
 def synthesize_instr_audios(instruction_file, out_dir):
 	"""Create audios for a list of instructions.
@@ -73,6 +64,16 @@ parser.add_argument("-o", "--out_dir", type=str, required=True,
 
 def main():
 	args = parser.parse_args()
+	
+	# Define Polly parameters (set using 'export PROFILE=profilename')
+	profile_name = os.getenv("PROFILE")
+	if not profile_name:
+		print("Specify polly profile using 'export PROFILE=profilename'")
+		print("You need to set up an AWS configuration, see: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html")
+		exit()
+	session = Session(profile_name=profile_name)
+	polly = session.client("polly")
+	
 	synthesize_instr_audios(args.file, args.out_dir)
 
 if __name__ == "__main__":

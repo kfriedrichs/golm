@@ -1,11 +1,11 @@
-"""Skript to evaluate the task logs
+"""Skript to evaluate the task logs.
 
 Author:
 	Karla Friedrichs
 Evaluation skript to bachelor thesis:
 	"Modeling collaborative reference in a Pentomino domain using the GOLMI framework"
 Usage:
-	python eval_log.py
+	python3 eval_log.py
 """
 
 import os
