@@ -1,5 +1,6 @@
 # collected data
 data_collection/
+data_collection_invalid/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

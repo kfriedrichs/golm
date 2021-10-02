@@ -1,0 +1,6 @@
+German	German,german,Deutsch,deutsch,Germand,gernan,Ger,ger
+English	English,english
+French	French,french
+English/Arabic	englich arabik
+German/Serbian	German/sirpski
+Portuguese	Portuguese

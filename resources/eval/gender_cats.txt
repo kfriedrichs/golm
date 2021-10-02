@@ -1,0 +1,4 @@
+female	female,Female,woman,Woman,f,F,weiblich,Weiblich,w,W
+male	male,Male,man,Man,m,M,männlich,Männlich
+non-binary	non-binary,Non-binary,nonbinary,Nonbinary,non binary,other,Other
+

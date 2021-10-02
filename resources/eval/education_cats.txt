@@ -1,0 +1,6 @@
+secondary school	secondary school,Abitur,abitur,Abi,ABI,A-levels,A-Levels,a-level,Hochschulreife,A level,higher education entrance qualification,High school,high school,highschool,high school (Abitur),General University Entrance Qualification
+Bachelor	Bachelor,Bachelore,bachelors,bachelor`s degree,Bachelor's Degree,bachelors degree,bachelor of science,Bachelor of Science,bsc,bachelor of arts,4-year Bachelors Degree
+Master	Master,Masters,master,Diploma,Graduate university,Master of Science,Master of Arts,Master Arts,Master of Education,studies,Magister artium,university diploma,university,M.A.,university degree,university
+PhD	PhD,phd
+apprenticeship	Abitur + Ausbildung
+master craftsman	master of pottery
