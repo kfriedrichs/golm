@@ -1,7 +1,14 @@
+/**
+ * File: PentoGenerator.js
+ * Contains the <PentoGenerator> class used during development.
+ * Additionally contains the unit test function <pentoGeneratorTest>.
+ */
 $(document).ready(function () {
 
 	/**
-	 *
+	 * Class: PentoGenerator
+	 * Currently not usable because it was not yet updated to
+	 * the websocket architecture.
 	 */
 	this.PentoGenerator = class PentoGenerator {
 		constructor(modelAPI) {
@@ -108,15 +115,18 @@ $(document).ready(function () {
 		}
 
 		sleep(ms) {
-      		return new Promise(resolve => setTimeout(resolve, ms));
-   		}
+			return new Promise(resolve => setTimeout(resolve, ms));
+		}
 
 	}; // class PentoGenerator end
 
 	// Unit test function
 	/**
+	 * Func: pentoGeneratorTest
 	 * Performs some tests on the PentoGenerator class and outputs the results to the console.
-	 * @return true if all tests have been passed, false if an error occurred
+	 *
+	 * Returns:
+	 * true if all tests have been passed, false if an error occurred
 	 */
 	document.pentoGeneratorTest = async function () {
 		console.log("Performing tests for PentoGenerator...");

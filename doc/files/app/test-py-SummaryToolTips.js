@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:app/test.py",{141:"<div class=\"NDToolTip TFile LPython\"><div class=\"TTSummary\">Currently not in use.</div></div>"});

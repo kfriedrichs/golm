@@ -1,0 +1,1 @@
+﻿NDContentPage.OnToolTipsLoaded({112:"<div class=\"NDToolTip TVariable LPython\"><div id=\"NDPrototype112\" class=\"NDPrototype\"><div class=\"PSection PPlainSection\">KEYS</div></div><div class=\"TTSummary\">list of keys used in questionnaire</div></div>"});

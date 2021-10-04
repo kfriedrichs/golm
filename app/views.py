@@ -1,3 +1,9 @@
+"""File: views.py
+Defines the routes served by GOLMI's server side.
+Currently, the endpoints "/", "/get_tasks/<string:taskname>"
+and "/save_log" are served.
+"""
+
 from app import app, socketio
 from flask import render_template, request, abort
 import json
@@ -8,16 +14,18 @@ import os
 
 @app.route("/", methods=["GET"])
 def index():
-	"""
-	Interactive interface.
+	"""Func: index
+	Serve the experiment interface.
 	"""
 	return render_template("index.html")
-
+# Section:
 @app.route("/get_tasks/<string:taskname>", methods=["GET"])
 def tasks(taskname):
-	"""
-	Retrieve tasks in JSON format.
-	@param taskname	name of the task set to load, one of: ["ba_tasks"]
+	"""Func: tasks
+	Retrieve tasks in json format.
+	
+	Params:
+	taskname - name of the task set to load, one of: ['ba_tasks']
 	"""
 	# tasks are saved in JSON format in a server-side file
 	savepath = app.config["TASKS"]
@@ -31,6 +39,11 @@ def tasks(taskname):
 
 @app.route("/save_log", methods=["POST"])
 def save_log():
+	"""Func: save_log
+	POST json data here to save it on the server side. Each log
+	is saved in its own file with filename generated from the
+	timestamp.
+	"""
 	if not request.data or not request.is_json:
 		abort(400)
 	json_data = request.json

@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("blo",["Property"],[["blockSize",,[["View",,,,0,"File:app/static/js/view/View.js:View.blockSize","JavaScriptClass:View:blockSize"]]]]);

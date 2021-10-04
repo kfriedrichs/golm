@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("dat",["Variable"],[["DATA_COLLECTION_PATH",,[[,,,,0,"File:scripts/count_collected_algs.py:DATA_COLLECTION_PATH"]]]]);

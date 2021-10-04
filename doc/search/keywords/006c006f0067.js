@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("log",["Class"],[["LogView",,[[,,,,0,"File:app/static/js/view/LView.js:LogView","JavaScriptClass:LogView"]]]]);

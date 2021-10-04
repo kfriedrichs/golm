@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("ind",["Function","File"],[["index",,[[,,,,0,"File:app/views.py:index"],[,"index.js",,,1,"File:app/static/js/index.js:index.js"]]]]);

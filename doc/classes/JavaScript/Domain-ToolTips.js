@@ -1,0 +1,1 @@
+﻿NDContentPage.OnToolTipsLoaded({250:"<div class=\"NDToolTip TClass LJavaScript\"><div class=\"TTSummary\">Represents a domain as used by the RDT algorithm.</div></div>"});

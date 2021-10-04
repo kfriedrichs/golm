@@ -1,0 +1,1 @@
+﻿NDContentPage.OnToolTipsLoaded({129:"<div class=\"NDToolTip TVariable LPython\"><div id=\"NDPrototype129\" class=\"NDPrototype\"><div class=\"PSection PPlainSection\">N_TASKS</div></div><div class=\"TTSummary\">number of tasks, used to evaluate all tasks with indes up to N_TASKS</div></div>"});

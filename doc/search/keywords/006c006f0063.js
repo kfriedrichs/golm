@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("loc",["Class","File"],[["LocalKeyController",,[[,,,,0,"File:app/static/js/controller/LocalKeyController.js:LocalKeyController","JavaScriptClass:LocalKeyController"],[,"LocalKeyController.js",,,1,"File:app/static/js/controller/LocalKeyController.js:LocalKeyController.js"]]]]);

@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("igv",["Class","File"],[["IGView",,[[,,,,0,"File:app/static/js/view/IGView.js:IGView","JavaScriptClass:IGView"],[,"IGView.js",,,1,"File:app/static/js/view/IGView.js:IGView.js"]]]]);

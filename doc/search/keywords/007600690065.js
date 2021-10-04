@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("vie",["Class","File"],[["View",,[[,,,,0,"File:app/static/js/view/View.js:View","JavaScriptClass:View"],[,"View.js",,,1,"File:app/static/js/view/View.js:View.js"]]],["views",,[[,"views.py",,,1,"File:app/views.py:views.py"]]]]);

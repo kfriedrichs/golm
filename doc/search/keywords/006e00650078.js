@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("nex",["Property"],[["nextTask",,[["IGView",,,,0,"File:app/static/js/view/IGView.js:IGView.nextTask","JavaScriptClass:IGView:nextTask"]]]]);

@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("dom",["Class"],[["Domain",,[[,,,,0,"File:app/static/js/view/IGView.js:Domain","JavaScriptClass:Domain"]]]]);

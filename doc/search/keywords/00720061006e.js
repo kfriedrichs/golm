@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("ran",["Function"],[["randomFromArray",,[[,,,,0,"File:app/static/js/util.js:randomFromArray"]]]]);

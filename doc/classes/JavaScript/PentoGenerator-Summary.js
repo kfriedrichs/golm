@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("JavaScriptClass:PentoGenerator","PentoGenerator");NDSummary.OnSummaryLoaded("JavaScriptClass:PentoGenerator",[["JavaScript","JavaScript"]],[["Classes","Class"],["Functions","Function"],["Groups","Group"]],[[166,0,0,"PentoGenerator"],[167,0,2,"Functions","Functions"],[170,0,1,"pentoGeneratorTest","pentoGeneratorTest"]]);

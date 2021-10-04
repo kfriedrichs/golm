@@ -1,35 +1,47 @@
+/**
+ * File: LocalKeyController.js
+ * Contains the <LocalKeyController> class.
+ */
+
 $(document).ready(function () {
 	
 	/**
-	 * Local controller. Can connect to one or more models. In each model, a gripper is created
-	 * at connection. If a gripperId is passed, an existing gripper with this id is assigned.
-	 * Otherwise a new gripper is added with the given id or alternatively the session id. 
-	 * The user's keystrokes are used to control the assigned gripper(s) and any gripped object.
-	 * @param {optional Array of [socket, gripperId], where gripperId can be null, default:null} modelSockets
+	 * Class: LocalKeyController
+	 * Local controller. Can connect to one or more <Model>s.
+	 * The user's keystrokes are used to control the assigned
+	 * <Gripper> (s) and any gripped <Obj>.
 	 */
 	this.LocalKeyController = class LocalKeyController {
+		/**
+		 * Func: Constructor
+		 * If sockets are passed, a <Gripper> is created
+		 * in each model at connection. If a gripperId is passed,
+		 * an existing <Gripper> with this id is assigned.
+		 * Otherwise a new gripper is added with the given id or
+		 * alternatively the session id.
+		 * Initializes keyboard event listeners.
+		 *
+		 * Params:
+		 * modelSockets - optional: Array of [socket, gripperId],
+		 * where gripperId can be null
+		 */
 		constructor(modelSockets=null) {
 			// array of model socket-gripperId pairs that are controlled
 			this.models = modelSockets ? modelSockets : new Array();
 			
 			// assign functions to key codes: [function for keydown, function for keyup, down?] 
-			// grip and flip are one-time actions, move and rotate are looped
+			// for now, all actions are one-time
 			this.keyAssignment = {
-				13: [this.grip, null, false],					// Enter
-				32: [this.grip, null, false],					// Space
-				// hack as long as loops are not fixed for sockeio server
+				13: [this.grip, null, false],			// Enter
+				32: [this.grip, null, false],			// Space
 				37: [this.moveLeft, null, false],		// arrow left
-				38: [this.moveUp, null, false],		// arrow up
+				38: [this.moveUp, null, false],			// arrow up
 				39: [this.moveRight, null, false],		// arrow right
 				40: [this.moveDown, null, false],		// arrow down
-				// 37: [this.moveLeft, this.stopMove, false],		// arrow left
-				// 38: [this.moveUp, this.stopMove, false],		// arrow up
-				// 39: [this.moveRight, this.stopMove, false],		// arrow right
-				// 40: [this.moveDown, this.stopMove, false],		// arrow down
-				65: [this.rotateLeft, null, false],	// a
+				65: [this.rotateLeft, null, false],		// a
 				68: [this.rotateRight, null, false],	// d
-				83: [this.flip, null, false],					// s
-				87: [this.flip, null, false]					// w
+				83: [this.flip, null, false],			// s
+				87: [this.flip, null, false]			// w
 			};
 
 			// Stores codes of pressed keys waiting for key release
@@ -42,11 +54,14 @@ $(document).ready(function () {
 		// --- (Un)Subscribing models ---
 
 		/**
-		 * Subscribe a new model. Duplicate subscription is prevented.
-		 * If no gripper with the given id exists, it will be added. If no id was
-		 * passed, the session id of the socket is used.
-		 * @param {socket of the model server to notify} socket
-		 * @param {optional: id of the gripper to control, default: null} grId
+		 * Func: attachModel
+		 * Subscribe a new <Model>. Duplicate subscription is prevented.
+		 * If no gripper with the given id exists, it will be added.
+		 * If no id was passed, the session id of the socket is used.
+		 *
+		 * Params:
+		 * socket - socket of the model server to notify
+		 * grId - optional: id of the gripper to control
 		 */
 		attachModel(socket, grId=null) {
 			// make sure not to subscribe a model-gripper pair twice
@@ -62,10 +77,14 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Remove a model from the internal list of models to notify. Remove the associated gripper.
-		 * @param {socket of the model API to unsubscribe} socket
-		 * @param {id of the gripper to unsubscribe, optional. If null, all grippers of the model url will be unsubscribed} grId
-		 * 
+		 * Func: detachModel
+		 * Remove a model from the internal list of <Model>s to notify.
+		 * Remove the associated gripper.
+		 *
+		 * Params:
+		 * socket - socket of the model API to unsubscribe
+		 * grId - id of the gripper to unsubscribe, optional. If null, all
+		 * grippers of the model url will be unsubscribed
 		 */
 		detachModel(socket, grId=null) {
 			if (grId) {
@@ -90,8 +109,12 @@ $(document).ready(function () {
 		// --- Notifying subscribed models ---
 
 		/**
-		 * Notifies all subscribed models that a "grip" should be attempted.
-		 * @param {reference to LocalKeyController instance (this)} thisArg
+		 * Func: grip
+		 * Notifies all subscribed <Model>s that a "grip" should
+		 * be attempted.
+		 *
+		 * Params:
+		 * thisArg - reference to this <LocalKeyController> instance
 		 */
 		grip(thisArg) {
 			let loop = false;
@@ -112,33 +135,46 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Notify models to move the gripper 1 unit to the left.
-		 * @param {reference to LocalKeyController instance (this)} thisArg
+		 * Func: moveLeft
+		 * Notify <Model>s to move the gripper 1 unit to the left.
+		 *
+		 * Params:
+		 * thisArg - reference to this <LocalKeyController> instance
 		 */
 		moveLeft(thisArg) { thisArg._moveGr(-1, 0); }
 
 		/**
-		 * Notify models to move the gripper 1 unit up.
-		 * @param {reference to LocalKeyController instance (this)} thisArg
+		 * Func: moveUp
+		 * Notify <Model>s to move the gripper 1 unit up.
+		 *
+		 * Params:
+		 * thisArg - reference to this <LocalKeyController> instance
 		 */
 		moveUp(thisArg) { thisArg._moveGr(0, -1); }
 		
 		/**
-		 * Notify models to move the gripper 1 unit to the right.
-		 * @param {reference to LocalKeyController instance (this)} thisArg
+		 * Func: moveRight
+		 * Notify <Model>s to move the gripper 1 unit to the right.
+		 *
+		 * Params:
+		 * thisArg - reference to this <LocalKeyController> instance
 		 */
 		moveRight(thisArg) { thisArg._moveGr(1, 0); }
 
 		/**
-		 * Notify models to move the gripper 1 unit down.
-		 * @param {reference to LocalKeyController instance (this)} thisArg
+		 * Func: moveDown
+		 * Notify <Model>s to move the gripper 1 unit down.
+		 *
+		 * Params:
+		 * thisArg - reference to this <LocalKeyController> instance
 		 */
 		moveDown(thisArg) { thisArg._moveGr(0, 1); }
 
 		/**
-		 * Helper function to notify models to move the gripper 1 block in a specified direction.
-		 * @param {number of blocks to move in x direction} dx
-		 * @param {number of blocks to move in y direction} dy
+		 * Helper function to notify <Model>s to move the gripper 1 block in a specified direction.
+		 * Params:
+		 * dx - number of blocks to move in x direction
+		 * dy - number of blocks to move in y direction
  		 */
 		_moveGr(dx, dy) {
 			let loop = false;
@@ -147,6 +183,9 @@ $(document).ready(function () {
 			});
 		}
 
+		/**
+		 * Unused. Can be employed to stop a looped moving action.
+		 */
 		stopMove(thisArg) {
 			thisArg.models.forEach(([socket, grId]) => {
 				socket.emit("stop_move", {"id": grId});
@@ -154,20 +193,27 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * 
-		 * @param {reference to LocalKeyController instance (this)} thisArg
+		 * Func: rotateLeft
+		 * Notify <Model>s to rotate a gripped <Obj> 1 unit to the left.
+		 *
+		 * Params:
+		 * thisArg - reference to this <LocalKeyController> instance
 		 */
 		rotateLeft(thisArg) { thisArg._rotate(-1); }
 
 		/**
-		 * 
-		 * @param {reference to LocalKeyController instance (this)} thisArg
+		 * Func: rotateRight
+		 * Notify <Model>s to rotate a gripped <Obj> 1 unit to the right.
+		 *
+		 * Params:
+		 * thisArg - reference to this <LocalKeyController> instance
 		 */
 		rotateRight(thisArg) { thisArg._rotate(1); }
 
 		/**
-		 * Helper function to notify models to rotate a gripped object in a specified direction.
-		 * @param {number of units to turn. Pass negative value for leftwards rotation} direction
+		 * Helper function to notify <Model>s to rotate a gripped <Obj> in a specified direction.
+		 * Params:
+		 * direction - number of units to turn. Pass negative value for leftwards rotation
 		 */
 		_rotate(direction) {
 			let loop = false;
@@ -176,6 +222,9 @@ $(document).ready(function () {
 			});
 		}
 
+		/**
+		 * Unused. Can be employed to stop a looped rotating action.
+		 */
 		stopRotate(thisArg) {
 			thisArg.models.forEach(([socket, grId]) => {
 				socket.emit("stop_rotate", {"id":grId});
@@ -183,8 +232,11 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Notify models to flip a gripped object on a specified axis.
-		 * @param {reference to LocalKeyController instance (this)} thisArg
+		 * Func: flip
+		 * Notify <Model>s to flip a gripped <Obj> on a specified axis.
+		 *
+		 * Params:
+		 * thisArg - reference to this <LocalKeyController> instance
 		 */
 		flip(thisArg) { 
 			let loop = false;
@@ -192,7 +244,10 @@ $(document).ready(function () {
 				socket.emit("flip", {"id":grId, "loop":loop});
 			});
 		}
-
+		
+		/**
+		 * Unused. Can be employed to stop a looped flipping action.
+		 */
 		stopFlip(thisArg) {
 			thisArg.models.forEach(([socket, grId]) => {
 				socket.emit("stop_flip", {"id":grId});
@@ -202,6 +257,8 @@ $(document).ready(function () {
 		// --- Reacting to user events ---
 
 		/**
+		 * Func: resetKeys
+		 * Used if looped movements are enabled.
 		 * Start fresh, delete any keys remembered as currently pressed.
 		 */
 		resetKeys(){
@@ -213,7 +270,7 @@ $(document).ready(function () {
 
 		/**
 		 * Register the key listeners to allow gripper manipulation.
-		 * Notifies the associated models.
+		 * Notifies the associated <Model>s.
 		 */
 		_initKeyListener() {
 			$(document).keydown( e => {
@@ -242,31 +299,35 @@ $(document).ready(function () {
 		}
 
 		/** 
-		 * Check whether a function is assigned to the keydown event of a given key code.
-		 * @param {int, code of the key in question} keyCode
-		 * @return bool, true signifying a function is assigned to keydown
+		 * Check whether a function is assigned to the keydown event
+		 * of a given key code.
+		 * Params:
+		 * keyCode - _int_, code of the key in question
+		 * Returns: _bool_, true signifying a function is assigned to keydown
 		 */
 		_downAssigned(keyCode) {
 			return this.keyAssignment[keyCode] && this.keyAssignment[keyCode][0];
 		}
 
 		/** 
-		 * Check whether a function is assigned to the keyup event of a given key code.
-		 * @param {int, code of the key in question} keyCode
-		 * @return bool, true signifying a function is assigned to keyup
+		 * Check whether a function is assigned to the keyup event
+		 * of a given key code.
+		 * Params:
+		 * keyCode - _int_, code of the key in question
+		 * Returns: _bool_, true signifying a function is assigned to keyup
 		 */
 		_upAssigned(keyCode) {
 			return this.keyAssignment[keyCode] && this.keyAssignment[keyCode][1];
 		}
 
 		/**
-		 * Check whether a key is currently in "down" state aka currently pressed.
-		 * @return bool, true if the key is "down"
+		 * Check whether a key is currently in "down" state aka
+		 * currently pressed.
+		 * Returns: _bool_, true if the key is "down"
 		 */
 		_isDown(keyCode) {
 			return this.keyAssignment[keyCode][2];
 		}
 
 	}; // class LocalKeyController end
-
 }); // on document ready end

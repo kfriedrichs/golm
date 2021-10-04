@@ -1,11 +1,23 @@
+/**
+ * File: index.js
+ * Main file to the experiment interface. Builds a connection to
+ * the <Model>, sets up a <LocalKeyController> and the view components
+ * (one instance each of <LayerView>, <IGView> and <LView>),
+ * retrieves tasks from the respective GOLMI endpoint.
+ * Presents introductory and questionnaire dialogs to the user
+ * and starts the tasks.
+ */
+
 $(document).ready(function () {
 	// if true, some unit tests will be performed
 	const SELFTEST = false;
 
 	// --- set up the APIs --- //
-	// Define the API URLs
+	// Variable: MODEL
+	// protocol, domain and port of the server
 	const MODEL	= window.location.protocol + "//" +document.domain + ':' + location.port;
-
+	
+	// Variable: CONFIG
 	// model configuration
 	const CONFIG = {
 		"move_step": 0.5,
@@ -20,7 +32,8 @@ $(document).ready(function () {
 	localStorage.debug = 'socket.io-client:socket';
 
 	// --- controller --- //
-	// create a controller, we still need to attach a gripper in the model to it
+	// create a controller, we still need to attach a gripper
+	//  in the model to it
 	let controller = new document.LocalKeyController();
 	// the controller will be attached to gripper "0" later
 	let gripperId = "0";
@@ -32,7 +45,7 @@ $(document).ready(function () {
 	let grLayer		= document.getElementById("gripper");
 	// resize the canvas and their container to the window
 	_resizeCanvas();
-
+	// initialize the GUI component
 	const layerView = new document.LayerView(socket, bgLayer, objLayer, grLayer);
 
 	// --- logger --- //
@@ -41,6 +54,9 @@ $(document).ready(function () {
 
 	// --- socket communication --- //
 	let setup_complete = false;
+	// this event listener starts the experiment by loading
+	// the configuration, attaching the model to the controller
+	// and starting the instruction giving view
 	socket.on("connect", () => {
 		console.log("Connected to model server");
 		// only do setup once (reconnections can occur, we don't want to reset the state every time)
@@ -62,8 +78,6 @@ $(document).ready(function () {
 	// randomly select one of the algorithms
 	const algorithms = ["IA", "RDT", "SE"];
 	const randomAlg = document.randomFromArray(algorithms);
-	// for debugging
-	//const randomAlg = "SE";
 	// log what algorithm has been used
 	logView.addData("algorithm", randomAlg);
 	const feedbackTimeInt = 10000;
@@ -89,6 +103,13 @@ $(document).ready(function () {
 	});
 
 	// --- stop and start drawing --- //
+	
+	/**
+	 * Func: start
+	 * Establish a connection to the <Model>. A client-side
+	 * listener to the 'connect' event will start the tasks
+	 * at success.
+	 */
 	function start() {
 		// reset the controller in case any key is currently pressed
 		controller.resetKeys()
@@ -96,6 +117,11 @@ $(document).ready(function () {
 		socket.connect();
 	}
 
+	/**
+	 * Func: stop
+	 * Disconnect the <LocalKeyController> from the <Model> to delete the
+	 * assigned <Gripper>, then cut the socket connection.
+	 */
 	function stop() {
 		// reset the controller in case any key is currently pressed
 		controller.resetKeys();
@@ -192,6 +218,7 @@ $(document).ready(function () {
 	
 	var testSample;
 	/**
+	 * Func: startAudiotest
 	 * Start playing an audiosample in a loop similarly to how
 	 * the IGView will play instructions later.
 	 */
@@ -202,6 +229,7 @@ $(document).ready(function () {
 	}
 	
 	/**
+	 * Func: stopAudiotest
 	 * Stop the looped test audio.
 	 */
 	function stopAudiotest() {
@@ -211,8 +239,11 @@ $(document).ready(function () {
 	}
 	
 	/**
-	 * Updates the displayed progress bar
-	 * @param {Completion in percent (int)} completion
+	 * Func: updateProgressBar
+	 * Update the displayed progress bar.
+	 *
+	 * Params:
+	 * completion - Completion in percent (_int_)
 	 */
 	function updateProgressBar(completion) {
 		// update width
@@ -222,7 +253,7 @@ $(document).ready(function () {
 	}
 	
 	/**
-	 * Adapt the three canvas elements to the current window sizes
+	 * Adapt the three canvas elements to the current window sizes.
 	 */
 	function _resizeCanvas() {
 		let newSize = 0.8 * window.innerHeight;
@@ -236,11 +267,5 @@ $(document).ready(function () {
 	// --- start --- //
 	// open the welcome dialog
 	welcome.showModal();
-	// for debugging
-	//start();
 
-	// --- unit tests --- //
-	if (SELFTEST) {
-		document.pentoGeneratorTest();
-	}
 }); // on document ready end

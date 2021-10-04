@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("PythonClass:Config","Config");NDSummary.OnSummaryLoaded("PythonClass:Config",[["Python","Python"]],[["Classes","Class"],["Functions","Function"],["Groups","Group"]],[[15,0,0,"Config"],[16,0,2,"Functions","Functions"],[22,0,1,"Constructor","Constructor"],[19,0,1,"get_types","get_types"],[23,0,1,"to_dict","to_dict"]]);

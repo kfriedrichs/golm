@@ -1,22 +1,34 @@
+/**
+ * File: LayerView
+ * Contains the <LayerView> class.
+ */
 $(document).ready(function () {
-
 	/**
-	 * Extends the generic View class by implementations of the drawing functions. 
+	 * Class: LayerView
+	 * Extends the generic <View> class by implementations of the drawing functions.
+	 *
 	 * This class works with three stacked canvas layers: the 'background' holds a grid 
 	 * (so if no grid is needed, the function drawBg() should be modified), the 'object'
-	 * layer has all static objects, that is objects not currently gripped, and finally the
-	 * 'gripper' layer displays any grippers as well as objects held by the grippers.
+	 * layer has all static <Obj>s, that is <Obj>s not currently gripped, and finally the
+	 * 'gripper' layer displays any <Gripper>s as well as <Obj>s held by the <Gripper>s.
 	 * The reasoning behind this separation is that these components need to be redrawn in 
 	 * varying frequency: while the background is static unless the game configuration (board 
-	 * dimensions, etc.) change, the objects are meant to be manipulated throughout an
-	 * interaction and might have to be redrawn several times. The gripper as well as the currently 
-	 * gripped objects however change continuously and have to be redrawn constantly.
-	 * @param {Socket io connection to the server} modelSocket
-	 * @param {reference to the canvas DOM element to draw the background to} bgCanvas
-	 * @param {reference to the canvas DOM element to draw the static objects to} objCanvas
-	 * @param {reference to the canvas DOM element to draw grippers and gripped objects to} grCanvas
+	 * dimensions, etc.) change, the <Obj>s are meant to be manipulated throughout an
+	 * interaction and might have to be redrawn several times. The <Gripper> as well as the
+	 * currently gripped <Obj>s however change continuously and have to be redrawn constantly.
 	 */
 	this.LayerView = class LayerView extends document.View {
+		/**
+		 * Func: Constructor
+		 * Clears all canvas.
+		 *
+		 * Params:
+		 * modelSocket - Socket io connection to the server
+		 * bgCanvas - reference to the canvas DOM element to draw the background to
+		 * objCanvas - reference to the canvas DOM element to draw the static objects to
+		 * grCanvas - reference to the canvas DOM element to draw grippers
+		 *	and gripped objects to
+		 */
 		constructor(modelSocket, bgCanvas, objCanvas, grCanvas) {
 			super(modelSocket);
 			// Three overlapping canvas
@@ -31,11 +43,14 @@ $(document).ready(function () {
 			this.clear();
 		}
 
+		// Property: canvasWidth
 		// Canvas width in pixels. Assumes all 3 canvas are the same size
 		get canvasWidth() {
 			return this.bgCanvas.width;
 		}
 
+		// Property: canvasHeight
+		// Canvas height in pixels. Assumes all 3 canvas are the same size
 		get canvasHeight() {
 			return this.bgCanvas.height;
 		}
@@ -43,7 +58,8 @@ $(document).ready(function () {
 		// --- drawing functions --- //
 
 		/**
-		 *  Remove any old drawings.
+		 * Func: clear
+		 * Remove any old drawings.
 		 */
 		clear() {
 			// clear all three canvas
@@ -53,6 +69,7 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: clearBg
 		 * Remove old drawings from the background layer.
 		 */
 		clearBg() {
@@ -61,6 +78,7 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: clearObj
 		 * Remove old drawings from the object layer.
 		 */
 		clearObj() {
@@ -69,6 +87,7 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: clearGr
 		 * Remove old drawings from the gripper layer.
 		 */
 		clearGr() {
@@ -77,6 +96,7 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: drawBg
 		 * Draws a grid black on white as the background.
 		 */
 		drawBg() {
@@ -104,16 +124,19 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: redrawBg
 		 * Redraw the background.
-		 * In contrast to drawBg(), this function assumes the background has been drawn in the past
+		 * In contrast to <drawBg>, this function assumes the
+		 * background has been drawn in the past
 		 * and the old drawing needs to be removed first.
-		 */ 
+		 */  
 		redrawBg() {
 			this.clearBg();
 			this.drawBg();
 		}
 
 		/**
+		 * Func: drawObjs
 		 * Draw the (static) objects.
 		 */
 		drawObjs() {
@@ -137,8 +160,10 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: redrawObjs
 		 * Redraw the (static) objects.
-		 * In contrast to drawObjs(), this function assumes the objects have been drawn in the past
+		 * In contrast to <drawObjs>, this function assumes the
+		 * objects have been drawn in the past
 		 * and the old drawing needs to be removed first.
 		 */
 		redrawObjs() {
@@ -147,8 +172,8 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Draw the gripper object and, if applicable, the gripped object.
-		 * The gripper is used to navigate on the canvas and move objects.
+		 * Func: drawGr
+		 * Draw the <Gripper> and, if applicable, the gripped <Obj>.
 		 */
 		drawGr() {
 			// set up
@@ -187,8 +212,11 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Redraw the gripper object and, if applicable, the gripped object.
-		 * In contrast to drawGr(), this function expects the gripper has been drawn in the past
+		 * Func: redrawGr
+		 * Draw the <Gripper> (and, depending on the
+		 * implementation, the gripped <Obj> too).
+		 * In contrast to <drawGr>, this function assumes
+		 * the gripper has been drawn in the past
 		 * and the old drawing needs to be removed first.
 		 */
 		redrawGr() {
@@ -197,7 +225,8 @@ $(document).ready(function () {
 		}
 
 		// --- draw helper functions ---
-
+		
+		// Draw an object consisting of blocks.
 		_drawBlockObj(ctx, bMatrix, params) {
 			// Draw blocks
 			for (let r=0; r<bMatrix.length;r++) {
@@ -208,18 +237,27 @@ $(document).ready(function () {
 						this._drawBlock(ctx, x, y, params.color);
 						// draw object borders
 						// top
-						if (r == 0 || !(bMatrix[r-1][c])) { this._drawBorder(ctx, x, y, x+1, y, params.highlight); }
+						if (r == 0 || !(bMatrix[r-1][c])) {
+							this._drawBorder(ctx, x, y, x+1, y, params.highlight);
+						}
 						// right
-						if (c == (bMatrix[r].length-1) || !(bMatrix[r][c+1])) { this._drawBorder(ctx, x+1, y, x+1, y+1, params.highlight); }
+						if (c == (bMatrix[r].length-1) || !(bMatrix[r][c+1])) {
+							this._drawBorder(ctx, x+1, y, x+1, y+1, params.highlight);
+						}
 						// bottom
-						if (r == (bMatrix.length-1) || !(bMatrix[r+1][c])) { this._drawBorder(ctx, x, y+1, x+1, y+1, params.highlight); }
+						if (r == (bMatrix.length-1) || !(bMatrix[r+1][c])) {
+							this._drawBorder(ctx, x, y+1, x+1, y+1, params.highlight);
+						}
 						// left
-						if (c == 0 || !(bMatrix[r][c-1])) { this._drawBorder(ctx, x, y, x, y+1, params.highlight); }
+						if (c == 0 || !(bMatrix[r][c-1])) {
+							this._drawBorder(ctx, x, y, x, y+1, params.highlight);
+						}
 					}
 				});
 			}
 		}
 
+		// Draw a single filled block.
 		_drawBlock(ctx, x, y, color, lineColor="grey", lineWidth=1) {
 			// --- config ---
 			ctx.fillStyle = color;
@@ -233,10 +271,10 @@ $(document).ready(function () {
 			ctx.stroke(); // draw the returning line
 			ctx.fill(); // add color
 		}
-
+		
+		// Draw a border to a rectangular shape.
 		_drawBorder(ctx, x1, y1, x2, y2, highlight=false, borderColor="black", borderWidth=2) {
 			// --- config ---
-			// TODO: fix highlights
 			// shadowBlur is set to 0 if highlight is false, effectively making it invisible
 			ctx.shadowBlur = highlight ? 5 : 0;
 			ctx.shadowColor = highlight;

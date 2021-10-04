@@ -1,8 +1,10 @@
-"""Helper functions to create plots.
+"""File: plot_helper.py
+Helper functions to create plots.
 
 Author:
 	Karla Friedrichs
-Evaluation skript to bachelor thesis:
+	
+Evaluation Skript To Bachelor Thesis:
 	"Modeling collaborative reference in a Pentomino domain using the GOLMI framework"
 """
 
@@ -18,26 +20,21 @@ import numpy as np
 # Python 3
 # Helper functions to create plots
 
-def create_hist(answer_list, title=None, savepath=None, xmin=None, xmax=None,  x_axislabel=None, y_axislabel=None):
-	"""Create a histogram.
+def create_hist(answer_list, title=None, savepath=None, xmin=None,
+				xmax=None,  x_axislabel=None, y_axislabel=None):
+	"""Func: create_hist
+	Create a histogram.
 	
-	Parameters
-	----------
-	answer_list: list of str
-		The category labels.
-	title : str or None
-		Title to display, pass None for no title.
-	savepath: str or None
+	Params:
+	answer_list - _list_ of _str_. The category labels.
+	title - _str_ or None. Title to display, pass None for no title.
+	savepath - _str_ or None.
 		If None, the plot will be shown (plt.show()), otherwise
 		the figure will be saved to the specified path.
-	x_min:
-		Leftmost / lowest bin.
-	x_max:
-		Rightmost / highest bin.
-	x_axislabel: str or None
-		Label for x axis.
-	y_axislabel: str or None
-		Label for y axis.
+	x_min - Leftmost / lowest bin.
+	x_max - Rightmost / highest bin.
+	x_axislabel - _str_ or None. Label for x axis.
+	y_axislabel - _str_ or None. Label for y axis.
 	"""
 	answer_list.sort()
 	if xmin == None or xmax == None:
@@ -57,32 +54,29 @@ def create_hist(answer_list, title=None, savepath=None, xmin=None, xmax=None,  x
 		plt.show()
 	plt.close(fig)
 	
-def create_line(categories, category_counts, title=None, savepath=None, x_ticklabels=None, x_axislabel=None, y_axislabel=None, y_lim=None, linestyles=None):
-	"""Create a (standard) line plot with one line per category.
+def create_line(categories, category_counts, title=None, savepath=None,
+				x_ticklabels=None, x_axislabel=None, y_axislabel=None,
+				y_lim=None, linestyles=None):
+	"""Func: create_line
+	Create a (standard) line plot with one line per category.
 	
-	Parameters
-	----------
-	categories : list of str
-		The category labels.
-	category_counts : dict
+	Params:
+	categories - _list_ of _str_. The category labels.
+	category_counts - _dict_.
 		A mapping from question labels to a list of answers per category.
 		It is assumed all lists contain the same number of entries and that
-		it matches the length of *categories*.
+		it matches the length of _categories_.
 		Each list needs to have the same length!
-	title : str or None
-		Title to display, pass None for no title.
-	savepath: str or None
+	title - _str_ or None. Title to display, pass None for no title.
+	savepath - _str_ or None
 		If None, the plot will be shown (plt.show()), otherwise
 		the figure will be saved to the specified path.
-	x_ticklabels: iterable or None
-		Labels to use for x axis ticks.
-	x_axislabel: str or None
-		Label for x axis.
-	y_axislabel: str or None
-		Label for y axis.
-	y_lim: tuple or None
+	x_ticklabels - iterable or None. Labels to use for x axis ticks.
+	x_axislabel - _str_ or None. Label for x axis.
+	y_axislabel -  _str_ or None. Label for y axis.
+	y_lim - tuple or None.
 		2-tuple (lower_limit, upper_limit) for y axis.
-	linestyles: dict or None
+	linestyles - _dict_ or None.
 		Define a matplotlib linestyle for each category
 	"""
 	fig, ax = plt.subplots(figsize=(7, 5))
@@ -111,21 +105,22 @@ def create_line(categories, category_counts, title=None, savepath=None, x_tickla
 		plt.show()
 	plt.close(fig)
 	
-def create_horizontal_stack(categories, category_counts, title=None, savepath=None, x_ticklabels=None, y_axislabel=None, y_lim=None):
-	"""Create a stack plot in horizontal orientation.
+def create_horizontal_stack(categories, category_counts, title=None,
+							savepath=None, x_ticklabels=None,
+							y_axislabel=None, y_lim=None):
+	"""Func: create_horizontal_stack
+	Create a stack plot in horizontal orientation.
 	
-	Adapted from https://matplotlib.org/stable/gallery/lines_bars_and_markers/horizontal_barchart_distribution.html#sphx-glr-gallery-lines-bars-and-markers-horizontal-barchart-distribution-py
-	Parameters
-	----------
-	categories : list of str
-		The category labels.
-	category_counts : dict
+	Adapted from <https://matplotlib.org/stable/gallery/lines_bars_and_markers/horizontal_barchart_distribution.html#sphx-glr-gallery-lines-bars-and-markers-horizontal-barchart-distribution-py>
+	
+	Params:
+	categories - _list_ of _str_. The category labels.
+	category_counts - _dict_
 		A mapping from question labels to a list of answers per category.
 		It is assumed all lists contain the same number of entries and that
 		it matches the length of *categories*.
-	title : str or None
-		Title to display, pass None for no title.
-	savepath: str or None
+	title - _str_ or None. Title to display, pass None for no title.
+	savepath - _str_ or None.
 		If None, the plot will be shown (plt.show()), otherwise
 		the figure will be saved to the specified path.
 	"""
@@ -159,28 +154,26 @@ def create_horizontal_stack(categories, category_counts, title=None, savepath=No
 		plt.show()
 	plt.close(fig)
 	
-def create_bar(categories, category_counts, category_error=None, title=None, savepath=None, y_ticklabels=None, y_axislabel=None, y_lim=None):
-	"""Create a bar plot.
+def create_bar(categories, category_counts, category_error=None,
+				title=None, savepath=None, y_ticklabels=None,
+				y_axislabel=None, y_lim=None):
+	"""Func: create_bar
+	Create a bar plot.
 	
-	Parameters
-	----------
-	categories: list
-		of category names, in the same order as category_counts.
-	category_counts : list
+	Params:
+	categories - _list_ of category names, in the same order
+		as _category_counts_.
+	category_counts - _list_.
 		Values associated to each category, in the same order as categories.
-	category_error: list or None
+	category_error - _list_ or None.
 		Error for each count, displayed as an error bar in the plot.
-	title : str or None
-		Title to display, pass None for no title.
-	savepath: str or None
+	title - _str_ or None. Title to display, pass None for no title.
+	savepath - _str_ or None
 		If None, the plot will be shown (plt.show()), otherwise
 		the figure will be saved to the specified path.
-	y_ticklabels: iterable or None
-		Labels to use for y axis ticks.
-	y_axislabel: str or None
-		Label for y axis.
-	y_lim: tuple or None
-		2-tuple (lower_limit, upper_limit) for y axis.
+	y_ticklabels - iterable or None. Labels to use for y axis ticks.
+	y_axislabel - _str_ or None. Label for y axis.
+	y_lim - tuple or None. 2-tuple (lower_limit, upper_limit) for y axis.
 	"""
 	fig, ax = plt.subplots()
 	fig.suptitle(title)

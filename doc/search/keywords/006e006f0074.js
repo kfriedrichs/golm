@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("not",["Function"],[["notify_views",,[["Model",,,,0,"File:model/model.py:Model.notify_views","PythonClass:Model:notify_views"]]]]);

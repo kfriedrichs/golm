@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("abo",["Function"],[["abortAllMsgs",,[["IGView",,,,0,"File:app/static/js/view/IGView.js:IGView.abortAllMsgs","JavaScriptClass:IGView:abortAllMsgs"]]]]);

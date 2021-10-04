@@ -1,13 +1,28 @@
+/**
+ * File: View.js
+ * Contains the <View> class.
+ */
+
 $(document).ready(function () {
 	/**
-	 * Abstract interface class. Separates the interface into background, objects and grippers
-	 * which concrete implementations of this view might want to draw separately to improve the
-	 * performance (the components are static to varying degrees).
-	 * While drawing functions lack implementations, internal data structures and basic communication
+	 * Class: View
+	 * Abstract interface class. Separates the interface into
+	 * background, objects and grippers which concrete
+	 * implementations of this view might want to draw
+	 * separately to improve the performance (the components
+	 * are static to varying degrees).
+	 * While drawing functions lack implementations,
+	 * internal data structures and basic communication
 	 * with the model are already sketched out in this class.
-	 * @param {Socket io connection to the server} modelSocket
 	 */
 	this.View = class View {
+		/**
+		 * Func: Constructor
+		 * Initializes socket listeners.
+		 *
+		 * Params:
+		 * modelSocket - Socket io connection to the server
+		 */
 		constructor(modelSocket) {
 			this.socket = modelSocket;
 			this._initSocketEvents();
@@ -22,8 +37,8 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Start listening to events emitted by the model socket. After this 
-		 * initialization, the view reacts to model updates.
+		 * Start listening to events emitted by the <Model> socket. After
+		 * this initialization, the view reacts to <Model> updates.
 		 */
 		_initSocketEvents() {
 			// new state -> redraw object and gripper layer
@@ -56,17 +71,23 @@ $(document).ready(function () {
 		}
 
 		// --- getter / setter --- //
-		// canvas width in pixels.
+		
+		// Property: canvasWidth
+		// canvas width in pixels
 		get canvasWidth() {
 			console.log("get canvasWidth() at View: not implemented");
 			return undefined;
 		}
 
+		// Property: canvasHeight
+		// canvas height in pixels
 		get canvasHeight() {
 			console.log("get canvasHeight() at View: not implemented");
 			return undefined;
 		}
-		
+
+		// Property: blockSize
+		// size of a (square) block in pixels
 		get blockSize() {
 			return this.canvasWidth/this.cols;
 		}
@@ -74,6 +95,7 @@ $(document).ready(function () {
 		// --- drawing functions --- //
 
 		/**
+		 * Func: clear
 		 * Remove any old drawings.
 		 */
 		clear() {
@@ -81,7 +103,8 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Draw background, objects, gripper.
+		 * Func: draw
+		 * Draw background, objects, grippers.
 		 */
 		draw() {
 			this.drawBg();
@@ -90,9 +113,11 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: redraw
 		 * Redraw everything. 
-		 * In contrast to draw(), this function assumes the game has been drawn in the past
-		 * and the old drawing needs to be removed first.
+		 * In contrast to <draw>, this function assumes the game has been
+		 * drawn in the past and the old drawing needs to be removed
+		 * first.
 		 */
 		redraw() {
 			this.clear();
@@ -100,15 +125,19 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: drawBg
 		 * Draw a background to the game.
+		 * Stub.
 		 */ 
 		drawBg() {
 			console.log("drawBg() at View: not implemented");
 		}
 
 		/**
+		 * Func: redrawBg
 		 * Redraw the background.
-		 * In contrast to drawBg(), this function assumes the background has been drawn in the past
+		 * In contrast to <drawBg>, this function assumes the
+		 * background has been drawn in the past
 		 * and the old drawing needs to be removed first.
 		 */ 
 		redrawBg() {
@@ -116,32 +145,41 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: drawObjs
 		 * Draw the (static) objects.
+		 * Stub.
 		 */
 		drawObjs() {
 			console.log(`drawObjs() at View: not implemented`);
 		}
 
 		/**
+		 * Func: redrawObjs
 		 * Redraw the (static) objects.
-		 * In contrast to drawObjs(), this function assumes the objects have been drawn in the past
+		 * In contrast to <drawObjs>, this function assumes the
+		 * objects have been drawn in the past
 		 * and the old drawing needs to be removed first.
+		 * Stub.
 		 */
 		redrawObjs() {
 			console.log(`redrawObjs() at View: not implemented`);
 		}
 
 		/**
-		 * Draw the gripper object (and, depending on the implementation, the gripped object too)
-		 * The Gripper is used to navigate on the canvas and move objects.
+		 * Func: drawGr
+		 * Draw the <Gripper> (and, depending on the
+		 * implementation, the gripped <Obj> too).
 		 */
 		drawGr() {
 			console.log("drawGr() at View: not implemented");
 		}
 
 		/**
-		 * Redraw the gripper object (and, depending on the implementation, the gripped object too).
-		 * In contrast to drawGr(), this function assumes the gripper has been drawn in the past
+		 * Func: redrawGr
+		 * Draw the <Gripper> (and, depending on the
+		 * implementation, the gripped <Obj> too).
+		 * In contrast to <drawGr>, this function assumes
+		 * the gripper has been drawn in the past
 		 * and the old drawing needs to be removed first.
 		 */
 		redrawGr() {
@@ -149,12 +187,15 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Loads a configuration received from the model. The values are saved since the configuration is
+		 * Loads a configuration received from the <Model>.
+		 * The values are saved since the <Config> is
 		 * not expected to change frequently. 
 		 * If no configuration is passed, it is requested from the model.
-		 * Implemented as an async function to make sure the configuration is complete before 
-		 * subsequent steps (i.e. drawing) are made.
-		 * @param {config object, obtained from the model} config
+		 * Implemented as an async function to make sure the
+		 * configuration is complete before subsequent steps
+		 * (i.e. drawing) are made.
+		 * Params:
+		 * config - <Config>, obtained from the <Model>
 		 */
 		_loadConfig(config) {
 			// Save all relevant values

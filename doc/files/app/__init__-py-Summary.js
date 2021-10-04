@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("File:app/__init__.py","__init__.py");NDSummary.OnSummaryLoaded("File:app/__init__.py",[["Python","Python"]],[["Files","File"]],[[105,0,0,"__init__.py","__init__.py"]]);

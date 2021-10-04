@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("wid",["Property"],[["width",,[["IGView",,,,0,"File:app/static/js/view/IGView.js:IGView.width","JavaScriptClass:IGView:width"]]]]);

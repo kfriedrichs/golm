@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("mod",["Class","File"],[["Model",,[[,,,,0,"File:model/model.py:Model","PythonClass:Model"],[,"model.py",,,1,"File:model/model.py:model.py"]]]]);

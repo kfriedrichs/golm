@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("upd",["Function"],[["updateProgressBar",,[[,,,,0,"File:app/static/js/index.js:updateProgressBar"]]]]);

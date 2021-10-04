@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("_ve",["Function"],[["_vectorDist",,[[,,,,0,"File:app/static/js/util.js:_vectorDist"]]]]);

@@ -1,3 +1,8 @@
+"""File: timed_loop.py
+
+Currently not in use.
+"""
+
 import time, threading
 
 # Adapted from https://stackoverflow.com/a/48709380

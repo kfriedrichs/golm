@@ -1,11 +1,14 @@
-"""Skript to evaluate the questionnaires.
+"""File: eval_questionnaire.py
+Skript to evaluate the questionnaires.
 
 Author:
 	Karla Friedrichs
-Evaluation skript to bachelor thesis:
+
+Evaluation Skript To Bachelor Thesis:
 	"Modeling collaborative reference in a Pentomino domain using the GOLMI framework"
+
 Usage:
-	python3 eval_questionnaire.py
+	> python3 eval_questionnaire.py
 """
 
 import os
@@ -16,24 +19,38 @@ from plot_helper import create_hist, create_bar, create_line, create_horizontal_
 
 ### globals ###
 
+# Variable: DATA_COLLECTION_PATH
 # directory containing json files, one per participant
 DATA_COLLECTION_PATH = "./app/static/resources/data_collection"
+# Variable: PLOT_PATH
 # directory to save created plots to
 PLOT_PATH = "./resources/plots"
+# Variable: MISC_PATH
 # directory for various files used in the evaluation
 MISC_PATH = "./resources/eval"
 
+# Variable: ALGORITHMS
+# list of algorithm names
 ALGORITHMS = ["IA", "RDT", "SE"]
+# Variable: LINESTYLES
+# dictionary mapping algorithm names to matplotlib
+# linestyles to use for plots
 LINESTYLES = {"IA": "-", "RDT": "dotted", "SE": "--"}
+# Variable: KEYS
+# list of keys used in questionnaire
 KEYS = [
-	"audiotest", "age", "gender", "education", "language", "fluency", "pentoVeteran", "comments",
+	"audiotest", "age", "gender", "education", "language",
+	"fluency", "pentoVeteran", "comments",
 	"anthropomorphism1", "anthropomorphism2", "anthropomorphism3",
 	"likeability1", "likeability2", "likeability3",
 	"intelligence1", "intelligence2", "intelligence3"
 	]
 
 def eval_questionnaire():
-	"""Prints and visualizes category_counts from the questionnaires."""
+	"""Func: eval_questionnaire
+	Evaluates the questionnaires: print statistics and creates plots
+	for each key of <KEYS>.
+	"""
 	q_data = read_questionnaires()
 	# present the category_counts, e.g. output average & missing answers, create a plot
 	# audiotest
@@ -59,18 +76,22 @@ def eval_questionnaire():
 ### evaluation of specific keys ###
 
 def print_audiotest(data):
-	"""Simply print all audiotest answers to the console.
+	"""Func: print_audiotest
+	Simply print all audiotest answers to the console.
 	
-	@param data	questionnaire data
+	Params:
+	data - questionnaire data
 	"""
 	audiotest_list, no_audiotest = _str_unquote(data["all"]["audiotest"])
 	if no_audiotest > 0:
 		print(audiotest_list, no_audiotest)
 
 def eval_age(data):
-	"""Print average age to the console and create a histogram for each algorithm.
+	"""Func: eval_age
+	Print average age to the console and create a histogram for each algorithm.
 	
-	@param data	questionnaire data
+	Params:
+	data - questionnaire data
 	"""
 	print("-"*20 + "\nAge\n" + "-"*20)
 	for alg in ["all"] + ALGORITHMS:
@@ -88,9 +109,12 @@ def eval_age(data):
 			xmin=16, xmax=60,  x_axislabel="Age", y_axislabel="Number of participants")
 
 def eval_fluency(data):
-	"""Print average fluency to the console and create a bar plot (including the standard deviation) for all algorithms.
+	"""Func: eval_fluency
+	Print average fluency to the console and create a bar plot
+	(including the standard deviation) for all algorithms.
 	
-	@param data	questionnaire data
+	Params:
+	data - questionnaire data
 	"""
 	print("-"*20 + "\nFluency\n" + "-"*20)
 	fluency_averages = list()
@@ -112,11 +136,15 @@ def eval_fluency(data):
 		y_axislabel="average self-assigned fluency score", y_lim=(1,7))
 
 def eval_godspeed(data):
-	"""Print average godspeed ratings to the console and create a line plot for anthropomorphism, likeability and intelligence.
+	"""Func: eval_godspeed
+	Print average godspeed ratings to the console and create a
+	line plot for anthropomorphism, likeability and intelligence.
 	
-	@param data	questionnaire data
+	Params:
+	data - questionnaire data
 	"""
 	print("-"*20 + "\nGodspeed\n" + "-"*20)
+	# map keys used in html to more human-readable ones
 	labels = {
 			"anthropomorphism1": "machinelike/humanlike",
 			"anthropomorphism2": "unconscious/conscious",
@@ -150,9 +178,12 @@ def eval_godspeed(data):
 			y_lim=(1,7), linestyles=LINESTYLES)
 
 def eval_gender(data):
-	"""Print gender distribution to the console and create a single horizontal stacked bar plot.
+	"""Func: eval_gender
+	Print gender distribution to the console and create a single
+	horizontal stacked bar plot.
 	
-	@param data	questionnaire data
+	Params:
+	data - questionnaire data
 	"""
 	print("-"*20 + "\nGender\n" + "-"*20)
 	gender_data = dict()
@@ -176,9 +207,12 @@ def eval_gender(data):
 		title="Gender distribution (in %, {} answers)".format(n_answers))
 
 def eval_education(data):
-	"""Print highest completed education to the console and create a bar plot for each algorithm.
+	"""Func: eval_education
+	Print highest completed education to the console and create
+	a bar plot for each algorithm.
 	
-	@param data	questionnaire data
+	Params:
+	data - questionnaire data
 	"""
 	print("-"*20 + "\nEducation\n" + "-"*20)
 	ed_cats = [
@@ -199,9 +233,12 @@ def eval_education(data):
 			y_axislabel="Number of participants")
 
 def eval_language(data):
-	"""Print first language to the console and create a bar plot for each algorithm.
+	"""Func: eval_language
+	Print first language to the console and create a bar plot
+	for each algorithm.
 	
-	@param data	questionnaire data
+	Params:
+	data - questionnaire data
 	"""
 	print("-"*20 + "\nLanguage\n" + "-"*20 )
 	lang_cats = [
@@ -222,9 +259,11 @@ def eval_language(data):
 			y_axislabel="Number of participants")
 
 def print_pento_veteran(data):
-	"""Simply print the number of Pentomino veterans to the console.
+	"""Func: print_pento_veteran
+	Simply print the number of Pentomino veterans to the console.
 	
-	@param data	questionnaire data
+	Params:
+	data - questionnaire data
 	"""
 	print("-"*20 + "\nPentoVeteran\n" + "-"*20)
 	for alg in ["all"] + ALGORITHMS:
@@ -232,9 +271,11 @@ def print_pento_veteran(data):
 		print("{}: {} played Pentomino before".format(alg, data[alg]["pentoVeteran"].count(True)))
 
 def write_comments(data):
-	"""Write comments into separate files for each algorithm.
+	"""Func: write_comments
+	Write comments into separate files for each algorithm.
 	
-	@param data	questionnaire data
+	Params:
+	data - questionnaire data
 	"""
 	for alg in ["all"] + ALGORITHMS:
 		# write comments into a file for manual evaluation
@@ -249,10 +290,11 @@ def write_comments(data):
 ### read data ###
 
 def read_questionnaires():
-	"""
+	"""Func: read_questionnaires
 	Reads in all json files and extract questionnaire answers.
 	
-	@return dictionary answers per algorithm and accumulated
+	Returns:
+	dictionary answers per algorithm and accumulated (key 'all')
 	"""
 	data = {alg: {key: list() for key in KEYS} for alg in ["all"] + ALGORITHMS}
 	
@@ -279,6 +321,7 @@ def read_questionnaires():
 
 ### preprocessing ###
 
+# convert numeric answers to int, count empty or invalid answers
 def _str_to_int(answer_list):
 	int_list = list()
 	no_answer = 0
@@ -291,7 +334,8 @@ def _str_to_int(answer_list):
 			print("Non-numeric answer found in _str_to_int: {}".format(answer_list[i]))
 			no_answer += 1
 	return int_list, no_answer
-	
+
+# revert html encoding of answer strings
 def _str_unquote(answer_list):
 	str_list = list()
 	no_answer = 0
@@ -305,23 +349,9 @@ def _str_unquote(answer_list):
 	
 ### statistics helper functions ###
 
-def _get_average(answer_dict):
-	n_answers	= 0	# number of valid numeric answers
-	answer_sum	= 0	# sum of numeric answers
-	no_answer = 0	# number of invalid or empty answers
-	
-	# assume all keys can be cast to int or are the empty string
-	for answer, count in answer_dict.items():
-		if answer == "" or answer == "-":
-			no_answer += count
-		elif not answer.isdigit():
-			print("Non-numeric answer found in _get_average: {}".format(answer))
-			no_answer += count
-		else:
-			n_answers += count
-			answer_sum += int(answer) * count
-	return answer_sum/n_answers, no_answer
-
+# match answers from a list into categories as defined in the file
+# pointed to by the second arg. Set percent to True to normalize
+# the results
 def _count_categories(answer_list, category_file, percent=False):
 	# read in the categories
 	category_map = dict()
@@ -352,8 +382,6 @@ def _count_categories(answer_list, category_file, percent=False):
 		for cat in category_counts:
 			category_counts[cat] = round(100 * (category_counts[cat] / answer_sum), 1)
 	return category_counts
-
-
 
 def main():
 	eval_questionnaire()

@@ -1,94 +1,138 @@
+/**
+ * File: IGView.js
+ * Contains the <IGView> class.
+ *
+ * Author:
+ *		Karla Friedrichs
+ *
+ * GOLMI Extension For Bachelor Thesis:
+ *		"Modeling collaborative reference in a Pentomino domain
+ *		using the GOLMI framework"
+ */
 $(document).ready(function () {
 
 	/**
-	 * Instruction giver view. Spoken instructions are emitted, guiding a user to choose a specific object.
-	 * @param {Socket io connection to the server} modelSocket 
-	 * @param {object mapping task index to tasks, in JSON format as accepted by the model} tasks
-	 * @param {name of the algorithm to use for an initial instruction, one of ["IA", "RDT"]. Determines the feedback algorithm too.} referenceAlg
-	 * @param {identifier of the gripper the instructed user is controlling} gripperId
-	 * @param {optional: time (ms) to wait before giving feedback if the user is idle, default: 5000} feedbackTimeInt
-	 * @param {optional: distance (blocks) the user has to move the gripper before feedback is given, default: 2} feedbackDistInt
+	 * Class: IGView
+	 * Instruction giver view.
+	 * Spoken instructions are emitted, guiding a user to choose a specific object.
 	 */
 	this.IGView = class IGView {
+		/**
+		 * Func: Constructor
+		 * Initializes socket events.
+		 *
+		 * Params:
+		 * modelSocket - Socket io connection to the server
+		 * tasks - object mapping task index to tasks,
+		 *		in JSON format as accepted by the <Model>
+		 * referenceAlg - _str_, name of the algorithm to use for an initial
+		 *		instruction, one of ["IA", "RDT", "SE"].
+		 *		Determines the feedback algorithm too.
+		 * gripperId - identifier used by the <Model> for the <Gripper>
+		 *		the instructed user is controlling
+		 * feedbackTimeInt - _int_, optional: time (ms) to wait before
+		 *		giving feedback if the user is idle
+		 * feedbackDistInt - optional: distance (blocks) the user has to
+		 *		move the <Gripper> before feedback is given
+		 * maxTries - _int_, number of incorrect selections allowed per task
+		 */
 		constructor(modelSocket, tasks, referenceAlg, gripperId,
 			feedbackTimeInt=10000, feedbackDistInt=2, maxTries=3) {
 			// server
-			this.socket			= modelSocket;
+			this.socket = modelSocket;
 
 			// task management
-			this.tasks 			= tasks;
-			this.currentTask	= -2; // index of current task
+			this.tasks = tasks;
+			this.currentTask = -2; // index of current task
 			this.currentTarget; // id of the goal object in the current task
 			this.currentObjects; // store objects for performance reasons.
-			this.gripperId		= gripperId; // identifier of the gripper that is tracked
-			this.config; 				// model configuration
-			this.maxTries		= maxTries;
-			this.currentTries	= 0;
+			this.gripperId = gripperId; // id of tracked gripper
+			this.config; // model configuration
+			this.maxTries = maxTries;
+			this.currentTries = 0;
 
-			// set reference and feedback algorithm according to the given algorithm name
+			// set reference and feedback algorithm according to the given name
 			this._referenceAlg, this._feedbackAlg;
 			this.setAlgorithms(referenceAlg);
 
 			// instruction parameters
-			this.instrStart		= ["Take", "Select", "Get"];
-			this.generalTypes	= ["piece"];
-			this.properties		= ["color", "shape", "posRelBoard"];
-			this.trProperties	= ["hPosRelGr", "vPosRelGr"];
+			this.instrStart = ["Take", "Select", "Get"];
+			this.generalTypes = ["piece"];
+			this.properties = ["color", "shape", "posRelBoard"];
+			this.trProperties = ["hPosRelGr", "vPosRelGr"];
 
 			// feedback parameters
-			this.feedbackTimeInt	= feedbackTimeInt;
-			this.feedbackDistInt	= feedbackDistInt;
-			this.lastMsg			= 0; // timestamp of the last message given to the user
+			this.feedbackTimeInt = feedbackTimeInt;
+			this.feedbackDistInt = feedbackDistInt;
+			this.lastMsg = 0; // timestamp of the last output message
 			this.targetCoords; // target object coordinates (center of object)
-			this.gripperTrace		= new Array(); // track positions since last message: [timestamp, x, y]
+			// track positions since last message: [timestamp, x, y]
+			this.gripperTrace = new Array();
 			this.feedbackTimeoutId; // stores timeout id to manage timed feedback
 			
-			this.msgQueue			= new Array(); // audios currently playing or waiting to be played
+			// audios currently playing or waiting to be played
+			this.msgQueue = new Array();
 			this._initSocketEvents();
 		}
 
 		// --- Getter ---
 
-		/**
-		 * @return number of tasks the instance has been assigned.
-		 */
+		// Property: nTasks
+		// number of tasks the instance has been assigned
 		get nTasks() {
 			return Object.keys(this.tasks).length;
 		}
 
-		/**
-		 * @return next task and increment the counter. If there is no more tasks, return null.
-		 */
+		// Property: nextTask
+		// Returns next task, counter currentTask is incremented.
+		// If there are no more tasks, returns null.
 		get nextTask() {
-			return (++this.currentTask) < this.nTasks ? this.tasks[(this.currentTask).toString()] : null;
+			return (++this.currentTask) < this.nTasks ?
+				this.tasks[(this.currentTask).toString()] : null;
 		}
 
-		/**
-		 * @return true if some task (excluding training tasks) has been loaded already
-		 */
+		// Property: hasStarted
+		// true if some task (excluding training tasks) has been loaded already
 		get hasStarted() {
 			return this.currentTask >= 0;
 		}
 
-		/**
-		 * @return number of blocks per row on the board. If no config was loaded, returns the default 20
-		 */
+		// Property: width
+		// Number of blocks per row on the board.
+		// If no config was loaded, returns the default 20.
 		get width() {
 			return this.config ? this.config.width : 20;
 		}
 
-		/**
-		 * @return number of blocks per column on the board. If no config was loaded, returns the default 20
-		 */
+		// Property: height
+		// Number of blocks per column on the board.
+		// If no config was loaded, returns the default 20.
 		get height() {
 			return this.config ? this.config.height : 20;
 		}
 
+		// Property: referenceAlg
+		// Function used to generate referring expressions.
+		get referenceAlg() {
+			return this._referenceAlg;
+		}
+
+		// Property: feedbackAlg
+		// Function used to generate feedback expressions.
+		get feedbackAlg() {
+			return this._feedbackAlg;
+		}
+		
 		/**
-		 * Takes a string and chooses the appropriate class functions for reference generation and
-		 * feedback-giving
-		 * Logs an error if function could not be found and defaults to IA and simpleFeedback.
-		 * @param {string, name of the algorithm for referring expression generation} referenceAlgName
+		 * Func: setAlgorithms
+		 * Takes a string and chooses the appropriate class functions
+		 * for reference generation and feedback-giving.
+		 * Logs an error if function could not be found and defaults
+		 * to <IA> and <simpleFeedback>.
+		 *
+		 * Params:
+		 * referenceAlgName - _str_, name of the REG algorithm to use.
+		 * 		One of ["IA", "RDT", "SE"].
 		 */
 		setAlgorithms(referenceAlgName) {
 			switch (referenceAlgName) {
@@ -105,28 +149,21 @@ $(document).ready(function () {
 					this._feedbackAlg = this.SEFeedback;
 					break;
 				default:
-					console.log("No (valid) reference algorithm selected. Defaulting to Incremental Algorithm and simple feedback...");
+					console.log("No (valid) reference algorithm selected." +
+						" Defaulting to Incremental Algorithm and simple feedback...");
 					this.setAlgorithms("IA");
 			}
 		}
-
-		/**
-		 * @return function used to generate referring expressions
-		 */
-		get referenceAlg() {
-			return this._referenceAlg;
-		}
-
-		/**
-		 * @return function used to generate feedback expressions
-		 */
-		get feedbackAlg() {
-			return this._feedbackAlg;
-		}
 		
 		/**
-		 * @param {int < 0, how many logged positions to look back, default:-1} stepsBack
-		 * @return penultimate gripper x coordinate, undefined if no coordinate has been logged yet
+		 * Func: getGripperX
+		 *
+		 * Params:
+		 * stepsBack - _int_ < 0, how many logged positions to look back
+		 *
+		 * Returns:
+		 * gripper x coordinate _stepsBack_ steps back, undefined if no
+		 *		coordinate has been logged yet
 		 */
 		getGripperX(stepsBack=-1) {
 			if (this.gripperTrace.length < -stepsBack) {
@@ -138,8 +175,14 @@ $(document).ready(function () {
 		}
 		
 		/**
-		 * @param {int < 0, how many logged positions to look back, default:-1} stepsBack
-		 * @return penultimate gripper y coordinate, undefined if no coordinate has been logged yet
+		 * Func: getGripperY
+		 *
+		 * Params:
+		 * stepsBack - _int_ < 0, how many logged positions to look back
+		 *
+		 * Returns:
+		 * gripper y coordinate _stepsBack_ steps back, undefined if no
+		 *		coordinate has been logged yet
 		 */
 		getGripperY(stepsBack=-1) {
 			if (this.gripperTrace.length < -stepsBack) {
@@ -151,14 +194,28 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * @return object associated to the given id, else undefined
+		 * Func: getObj
+		 *
+		 * Params:
+		 * id - <Obj> id
+		 *
+		 * Returns:
+		 * object associated to the given id, undefined if id does not exist
 		 */
 		getObj(id) {
 			return this.currentObjects[id];
 		}
 
 		/**
-		 * @return value an object with the given id has for the given property name, undefined if id is unknown or property not defined
+		 * Func: getObjValue
+		 *
+		 * Params:
+		 * id - <Obj> id
+		 * property - <Obj> property name
+		 *
+		 * Returns:
+		 * value an object with the given id has for the given property name,
+		 * undefined if id is unknown or property not defined
 		 */
 		getObjValue(id, property) {
 			if (this.currentObjects[id]) { 
@@ -168,7 +225,8 @@ $(document).ready(function () {
 		}
 
 		// --- socket events --- //
-
+	
+		// initialize listeners for socket events
 		_initSocketEvents() {
 			this.socket.on("update_config", (config) => {
 				this.config = config;
@@ -176,14 +234,14 @@ $(document).ready(function () {
 			// state was loaded. Start giving instructions
 			this.socket.on("update_state", (state) => {
 				// get the objects from the model, since the state might differ slightly
-				// from the sent task (because of defaults and configuration restrictions). It's best to 
-				// synchronize with the model to match the instruction with what is displayed.
+				// from the sent task (because of defaults and configuration restrictions).
+				// It's best to synchronize with the model to match the instruction with
+				// what is displayed.
 				this.currentObjects = state["objs"];
 				// save the target coordinates (if objects containing the target were sent)
 				if (this.currentObjects[this.currentTarget]) {
 					let target = this.currentObjects[this.currentTarget];
 					this.targetCoords = [target.x+(target.width/2), target.y+(target.height/2)];
-
 					this.giveInstruction();
 				}
 			});
@@ -193,7 +251,8 @@ $(document).ready(function () {
 						// task is completed if 
 						// (a) correct object was selected
 						// (b) maxTries incorrect attempts were made
-						if (Object.keys(grippers[this.gripperId]["gripped"]).includes(this.currentTarget)) {
+						if (Object.keys(grippers[this.gripperId]["gripped"]).includes(
+								this.currentTarget)) {
 							// target was selected
 							this.taskCompleted();	
 						} else {
@@ -214,15 +273,16 @@ $(document).ready(function () {
 					} else {
 						// the gripper has been moved (-> might trigger feedback)
 						// save the new gripper position
-						this.gripperTrace.push([Date.now(),
+						this.gripperTrace.push([
+												Date.now(),
 												grippers[this.gripperId].x,
-												grippers[this.gripperId].y]);
+												grippers[this.gripperId].y
+												]);
 						// if feedback algorithm is set and significant progress
 						// was made, give feedback to user
 						if (this.feedbackAlg) {
 							this.giveFeedback();
 						}
-						
 					}
 				}
 			});
@@ -231,7 +291,9 @@ $(document).ready(function () {
 		// --- Task flow ---
 
 		/**
-		 * Load the first task and start listening to model updates
+		 * Func: start
+		 * Load the first task and start listening to model updates.
+		 * Logs an error if loading fails.
 		 */
 		start() {
 			// introduction
@@ -239,13 +301,17 @@ $(document).ready(function () {
 			// start the task flow
 			this.currentTask = -2;
 			if (!this._loadTask()) {
-				console.log("Error: No task could be loaded at IGView. Passed empty task object?");
+				console.log("Error: No task could be loaded at IGView." +
+					" Passed empty task object?");
 				this.goodbye();
 			}
 		}
 
 		/**
-		 * User completed a task. Emit a message to the user, stop updating and try loading the next task.
+		 * Func: taskCompleted
+		 * User completed a task. Emit a message to the user,
+		 * stop updating and try loading the next task.
+		 * Emits 'logSegment' event to the document.
 		 */ 
 		taskCompleted() {
 			// abort pending messages
@@ -253,17 +319,22 @@ $(document).ready(function () {
 			// pause feedback loop until a new task is started
 			this.stopFeedbackTimeout();
 			// emit global event for logger to catch
-			document.dispatchEvent(new CustomEvent("logSegment", 
-				{ detail: { "segmentTitle": this.currentTask,
-							"additionalData": { "target": this.currentTarget, "incorrectAttempts": this.currentTries}}}));
+			document.dispatchEvent(new CustomEvent("logSegment", { detail: {
+				"segmentTitle": this.currentTask, "additionalData": {
+					"target": this.currentTarget,
+					"incorrectAttempts": this.currentTries
+				}
+			}}));
 			if (!this._loadTask()) {
 				this.goodbye();
 			}
 		}
 
 		/**
-		 * If there is another task, post it to the model, then save the objects and target of this task.
-		 * @return true if a task was loaded, false if no more tasks are available
+		 * If there is another task, emit a 'load_state' event
+		 * to the model, then save the objects and target of this task.
+		 * Returns: true if a task was loaded, false if no
+		 *		more tasks are available
 		 */
 		_loadTask() {
 			// load the next (predefined) task
@@ -277,8 +348,11 @@ $(document).ready(function () {
 			// set the goal object
 			this.currentTarget = task.target.toString();
 			// remember the gripper start position
-			this.gripperTrace = [
-				[Date.now(), task.task.grippers[this.gripperId].x, task.task.grippers[this.gripperId].y]];
+			this.gripperTrace = [ [
+									Date.now(),
+									task.task.grippers[this.gripperId].x,
+									task.task.grippers[this.gripperId].y
+								] ];
 
 			// load the task into the model
 			this.socket.emit("load_state", task.task);
@@ -288,6 +362,7 @@ $(document).ready(function () {
 		// --- User communication --- //
 
 		/**
+		 * Func: welcome
 		 * Welcome the user, explain rules, etc.
 		 */
 		welcome() {
@@ -302,7 +377,9 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Thank the user for participating, etc. Dispatch a "tasksCompleted" event.
+		 * Func: goodbye
+		 * Thank the user for participating, etc.
+		 * Emit a 'tasksCompleted' event to the document.
 		 */
 		goodbye() {
 			this._queueMsg("Thank you for participating. Have a nice day");
@@ -310,8 +387,9 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Emit a full instruction, describing the target piece to the user according to the selected 
-		 * algorithm.
+		 * Func: giveInstruction
+		 * Construct and queue a full instruction, describing the target piece
+		 * to the user, using the selected REG algorithm.
 		 */
 		giveInstruction() {
 			// use reference algorithm to generate an instruction, otherwise force feedback 
@@ -320,9 +398,14 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * If a feedback algorithm is set, react to the user's progress. Depending on the
-		 * algorithm, this might be further information, correction or support.
-		 * @param {if set to true, no additional checks will be made, default: false} force
+		 * Func: giveFeedback
+		 * If a feedback algorithm is set, react to the user's progress
+		 * by constructing and queueing a feedback message.
+		 * Depending on the algorithm, this might be further information,
+		 * correction or support.
+		 *
+		 * Params:
+		 * force - if set to true, no additional checks will be made
 		 */
 		giveFeedback(force=false) {
 			// try to contruct feedback - returns null if no feedback needed
@@ -333,9 +416,12 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Deliver a message to the user.
-		 * @param {string, message to send} msg
-		 * @param {type of message, one of ["instruction", "feedback", "meta"], used for log event} type
+		 * Prepare a message to deliver to the user. It will be played
+		 * once it reaches the top of the message queue.
+		 * Params:
+		 * msg - _str_, message to send
+		 * type - type of message, one of ["instruction", "feedback", "meta"],
+		 * 		used for logging
 		 */
 		_queueMsg(msg, type="meta") {
 			// stop the feedback loop, will be restarted once queue is empty
@@ -361,6 +447,7 @@ $(document).ready(function () {
 		}
 		
 		/**
+		 * Func: abortAllMsgs
 		 * Stop any audio currently playing and delete waiting messages.
 		 */
 		abortAllMsgs() {
@@ -370,6 +457,10 @@ $(document).ready(function () {
 			}
 		}
 		
+		/**
+		 * Play the first message waiting in the message queue.
+		 * Emits a 'emitMessage' event to the document.
+		 */
 		_playNextMsg() {
 			if (this._hasPendingMsg()) {
 				// play the first message in the queue
@@ -384,14 +475,16 @@ $(document).ready(function () {
 				nextAudio.onended = () => this._msgEnded();
 				// dispatch event and play as soon as the audio is ready:
 				if (nextAudio.readyState >= 2) {
-						document.dispatchEvent(new CustomEvent("emitMessage",
-							{ detail: { "type": nextType, "content": nextMsg, "duration": nextAudio.duration }}));
+						document.dispatchEvent(new CustomEvent("emitMessage", { detail: {
+							"type": nextType, "content": nextMsg, "duration": nextAudio.duration
+						}}));
 						nextAudio.play();
 				} else {
 					nextAudio.oncanplaythrough = function() {
 						// dispatch message event
-						document.dispatchEvent(new CustomEvent("emitMessage",
-							{ detail: { "type": nextType, "content": nextMsg, "duration": nextAudio.duration }}));
+						document.dispatchEvent(new CustomEvent("emitMessage", { detail: {
+							"type": nextType, "content": nextMsg, "duration": nextAudio.duration
+						}}));
 						nextAudio.play();
 					};
 				}
@@ -400,14 +493,16 @@ $(document).ready(function () {
 		
 		/**
 		 * Fallback method for message delivery in case audio can't be used.
-		 * Not very user-friendly.
+		 * Not very user-friendly, prints to the interface.
+		 * Emits a 'emitMessage' event to the document.
 		 */
 		_displayNextMsg() {
 			if (this._hasPendingMsg()) {
 				let [nextMsg, nextAudio, nextType] = this.msgQueue[0];
 				// dispatch message event (with error tag)
-				document.dispatchEvent(new CustomEvent("emitMessage",
-					{ detail: { "type": nextType, "content": nextMsg, "error":true }}));
+				document.dispatchEvent(new CustomEvent("emitMessage", { detail: {
+					"type": nextType, "content": nextMsg, "error":true
+				}}));
 				// print message to console and display in the interface
 				console.log(nextMsg);
 				$("#instructions").text(nextMsg);
@@ -419,12 +514,18 @@ $(document).ready(function () {
 		}
 		
 		/**
-		 * Delete any message currently displayed in the interface
+		 * Delete any message currently displayed in the interface.
+		 * (see _displayNextMsg())
 		 */
 		_emptyDisplay() {
 			$("#instructions").text("");
 		}
 		
+		/**
+		 * Function called after a message has been delivered (i.e. was
+		 * displayed or audio has ended). Reset gripper trace. Play the
+		 * next waiting message or restart the feedback timer.
+		 */
 		_msgEnded() {
 			// update the timestamp of the last message delivered to the user
 			this.lastMsg = Date.now();
@@ -437,26 +538,33 @@ $(document).ready(function () {
 			if (this._hasPendingMsg()) {
 				this._playNextMsg();
 			} else if (msgType != "meta") {
-				// (re)start the feedback loop if the delivered message was instruction or feedback
+				// (re)start the feedback loop if the delivered message was
+				// instruction or feedback
 				this.startFeedbackTimeout(this.feedbackTimeInt);
 			}
 		}
 		
 		/**
 		 * Check if the internal message queue contains pending messages.
-		 * @return true if a message is currently playing or waiting to be played
+		 * Returns:
+		 * true if a message is currently playing or waiting to be played
 		 */
 		_hasPendingMsg() {
 			return this.msgQueue.length > 0;
 		}
 		
 		/**
-		 * Give feedback to the user after some time has elapsed. Stop the loop using stopFeedbackTimeout()
-		 * @param {time to wait before feedback} delay
+		 * Func: startFeedbackTimeout
+		 * Give feedback to the user after some time has elapsed.
+		 * Stop the loop using <stopFeedbackTimeout>.
+		 *
+		 * Params:
+		 * delay - time (ms) to wait before generating feedback
 		 */
 		startFeedbackTimeout(delay) {
 			this.stopFeedbackTimeout();
-			// start a timer: after set time of no interaction with the user, feedback message is given
+			// start a timer: after set time of no interaction with the user,
+			// feedback message is given
 			if (this.feedbackAlg) {
 				let thisArg = this;
 				this.feedbackTimeoutId = setTimeout(async function() {
@@ -467,7 +575,8 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Stop giving feedback in regular time intervals
+		 * Func: stopFeedbackTimeout
+		 * Stop giving feedback in regular time intervals.
 		 */
 		stopFeedbackTimeout() {
 			if (this.feedbackTimeoutId) { clearTimeout(this.feedbackTimeoutId); }
@@ -478,16 +587,19 @@ $(document).ready(function () {
 		// --- Incremental Algorithm by E. Reiter & R. Dale --- //
 
 		/**
+		 * Func: IA
 		 * Construct a reference using the incremental algorithm. 
-		 * Algorithm adapted from E. Reiter & R. Dale (1992). See https://aclanthology.org/C92-1038.pdf or
-		 * the documentation a description and the full source.
+		 * Algorithm adapted from E. Reiter & R. Dale (1992).
+		 * See <https://aclanthology.org/C92-1038.pdf> and
+		 * the thesis for the full source and a description.
 		 */
 		IA() {
 			// preference order
 			let P = this.properties;
 			// construct a contrast set: first copy all objects into a set
 			let C = new Set(Object.values(this.currentObjects));
-			// target piece. Named r here to better match the pseudocode by Reiter & Dale
+			// target piece. Named r here to better match the pseudocode
+			// by Reiter & Dale
 			let r = this.currentObjects[this.currentTarget];
 			// remove the target from the contrast set
 			C.delete(r);
@@ -506,7 +618,8 @@ $(document).ready(function () {
 					ruledOutObjs.forEach(ruledOut => C.delete(ruledOut));
 				}
 
-				// check if enough properties have been collected to rule out all contrast objects
+				// check if enough properties have been collected to rule out
+				// all contrast objects
 				if (C.size == 0) {
 					return document.randomFromArray(this.instrStart) + " the " + this._verbalizeRE(L);
 				}
@@ -518,10 +631,14 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * @param {property name} prop
-		 * @param {value the target object has assigned to the given property} val
-		 * @param {contrast set of objects to rule out by the given the property-value pair} contrastSet
-		 * @return Array of contrast objects differing to val in the given property
+		 * Helper function for IA.
+		 * Params:
+		 * prop - property name
+		 * val - value the target object has assigned to the given property
+		 * constrastSet - contrast set of objects to rule out by the given
+		 *		the property-value pair
+		 * Returns:
+		 * array of contrast objects with a different value for prop
 		 */
 		_rulesOut(prop, val, contrastSet) {
 			let ruledOutObjs = new Array();
@@ -535,9 +652,35 @@ $(document).ready(function () {
 
 		// --- REG algorithm with Reference Domain Theory by Denis (2010) --- //
 
+		/**
+		 * Func: RDT
+		 * Function for the initial instruction when using the RDT
+		 * algorithm by A. Denis 2010.
+		 * See <https://aclanthology.org/W10-4203.pdf>.
+		 * Define a 'nested class' Domain. Initially create the referential
+		 * space and generate the first instruction.
+		 *
+		 * Returns:
+		 * initial instruction created using the RDT algorithm
+		 */
 		RDT() {
-			// Mimicking a 'nested class' here for the notion of a domain - it's really just a function contructing an object
+			// Mimicking a 'nested class' here for the notion of a domain -
+			// it's really just a function contructing an object
+			
+			// Class: Domain
+			// Represents a domain as used by the RDT algorithm.
 			this.Domain = class {
+				/** Func: Constructor
+				 *
+				 * Params:
+				 * ground - set of object in this <Domain>
+				 * semanticDesc - set of property-value pairs applying to
+				 *		all objects in the ground
+				 * salience - int, score describing how 'activated' a <Domain>
+				 *		is in the current dialogue
+				 * partition - triple: property name, object mapping property
+				 *		values to sets of objects with this value, focus of partition
+				 */
 				constructor(ground, semanticDesc, salience, partition) {
 					this.ground			= ground;
 					this.semanticDesc	= semanticDesc;
@@ -545,6 +688,7 @@ $(document).ready(function () {
 					this.partition		= partition;
 				}
 			}
+			// Class: IGView
 
 			// create the referential space
 			this.RS = new Set();
@@ -558,10 +702,18 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Generate a new reference to the current target object, using the current referential space.
-		 * (Figure 2: generate)
-		 * @param {optional: referent or set of referents to generate a RE for, default: current target} t
-		 * @return
+		 * Func: generateRDT
+		 * Generate a new reference to the current target object,
+		 * using the current referential space.
+		 * (see original paper Fig. 2: generate)
+		 *
+		 * Params:
+		 * t - optional: referent or set of referents to generate a
+		 * 		referring expression for *default*: set containing
+		 *		current target
+		 *
+		 * Returns:
+		 * referring expression describing t
 		 */
 		generateRDT(t=(new Set([this.currentTarget]))) {
 			// get the most salient / specific domain containing currentTarget
@@ -586,11 +738,15 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: restructure
 		 * Restructure the referential space after a reference within D,
 		 * using only the persistent properties of S. Transient properties
-		 * and all domains and partitions generated using them are deleted.
-		 * @param {domain} D
-		 * @param {set of property-value pairs} S
+		 * and all <Domain>s and partitions generated using them are deleted.
+		 * (see original paper Fig. 3: restructure)
+		 *
+		 * Params:
+		 * D - <Domain>
+		 * S - set of property-value pairs
 		 */
 		restructure(D, S) {
 			// collect all persistent properties in S
@@ -623,7 +779,8 @@ $(document).ready(function () {
 			if (!foundMatchingDomain) {
 				// if no matching domain was found, create a new domain with maximum salience
 				let newD = new this.Domain(
-					Gp, Sp, this._getMaxSalience()+1, this._defaultPartition(Gp));
+					Gp, Sp, this._getMaxSalience()+1, this._defaultPartition(Gp)
+				);
 				this.RS.add(newD);
 			}
 		}
@@ -631,11 +788,14 @@ $(document).ready(function () {
 		/**
 		 * Create a partition tree structure. 
 		 * Iterating throught the properties in the order defined by T,
-		 * the set of objects ('ground' of the given domain D) is divided into subsets sharing some
-		 * property value, until sets with only one entry each are left.
-		 * Newly created domains are added to this instance's RS set.
-		 * @param {Domain instance to be further partitioned} D
-		 * @param {Array of property names in a preference order} T
+		 * the set of objects ('ground' of the given <Domain> D) is divided
+		 * into subsets sharing some property value, until sets with only
+		 * one entry each are left.
+		 * Newly created <Domain>s are added to this instance's RS set.
+		 * (see original paper Fig. 1: createPartitions)
+		 * Params:
+		 * D - Domain instance to be further partitioned
+		 * T - array of property names in a preference order
 		 */
 		_createPartitions(D, T) {
 			this.RS.add(D);
@@ -671,10 +831,13 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Create the default partition defined as: def(X) = ("id", X/R_id, new Set())
+		 * Create the default partition defined as:
+		 * def(X) = ("id", X/R_id, new Set())
 		 * where X/R_id denotes creating subsets with one element of X each.
-		 * @param {set of objects to create a default partition for}
-		 * @return partition array: ("id", subsets, focus)
+		 * Params:
+		 * X - set of objects to create a default partition for
+		 * Returns:
+		 * partition array: ["id", subsets, focus]
 		 */
 		_defaultPartition(X) {
 			let partition = ["id", new Object(), new Set()];
@@ -686,9 +849,13 @@ $(document).ready(function () {
 		/**
 		 * Create a partition of a set of objects with respect to some property.
 		 * In other words, create the quotient set of 'ground' by 'property'.
-		 * @param {set of objects to divide} ground
-		 * @param {property name for division: each object in 'ground' should have this property} property
-		 * @return The partition is realized as an object here, each value found for property maps to a set of objects
+		 * Params:
+		 * ground - set of objects to divide
+		 * property - property name for division: each object in 'ground'
+		 *		should have this property
+		 * Returns:
+		 * The partition is realized as an object here, each value found
+		 * for property maps to a set of objects
 		 */
 		_getPartition(ground, prop) {
 			let partition = new Object();
@@ -706,8 +873,14 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * @param {optional: referent or set of referents to generate a RE for, default: set containing current target} t
-		 * @return most salient / specific domain from RS for the current target object
+		 * Find the best <Domain> to a set of targets. The original paper
+		 * asks for selecting the <Domain> with the highest salience and
+		 * the fewest members. It is not explicitly stated which of the
+		 * criteria is to be prioritized, therefore the first-mentioned
+		 * (salience) is prioritized here.
+		 * t - optional: referent or set of referents to generate a RE
+		 *		for, *default*: set containing current target
+		 * Returns: most salient / specific <Domain> from RS for _t_
 		 */
 		_getBestDomain(t=(new Set([this.currentTarget]))) {
 			let bestDomain;
@@ -718,10 +891,12 @@ $(document).ready(function () {
 						// no competing domain found yet, just assign this one
 						bestDomain = domain;
 					} else {
-						// check if this domain is more salient or is smaller (= more specific) with equal salience
+						// check if this domain is more salient or is smaller (= more specific)
+						// with equal salience
 						if (domain.salience > bestDomain.salience) {
 							bestDomain = domain;
-						} else if (domain.salience == bestDomain.salience && domain.ground.size < bestDomain.ground.size) {
+						} else if (domain.salience == bestDomain.salience &&
+								domain.ground.size < bestDomain.ground.size) {
 							bestDomain = domain;
 						}
 					}
@@ -731,12 +906,14 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Find an underspecified domain matching the given domain
-		 * Fig. 2 line 3 / underspecified domains defined in Table 1
-		 * @param {set of target object(s)} t
-		 * @param {most salient / specific domain containing t} D
-		 * @param {property-value pairs describing t} S
-		 * @return string, underspecified reference to t
+		 * Find an underspecified domain matching the given <Domain>.
+		 * (see original paper Fig. 2 line 3; underspecified domains
+		 * are defined in Table 1)
+		 * Params:
+		 * t - set of target object(s)
+		 * D - most salient / specific <Domain> containing _t_
+		 * S - property-value pairs describing _t_
+		 * Returns: string, underspecified reference to _t_
 		 */
 		_matchUnderspecifiedDomain(t, D, S) {
 			let plural = (t.size > 1);
@@ -775,7 +952,7 @@ $(document).ready(function () {
 					for (let partitionInFocus of D.partition[2]) {
 						// check whether the partition is NOT in focus AND NOT the target set
 						// -> case 6 / 7
-						if (!document.setEquals(partition, partitionInFocus) && !document.setEquals(partition, t)) {
+						if (!document.setEquals(partition, partitionInFocus) && 	!document.setEquals(partition, t)) {
 							return "another one";
 						}
 					}
@@ -790,6 +967,14 @@ $(document).ready(function () {
 
 		// --- REG helper functions used by multiple algorithms --- //
 
+		/**
+		 * Determine the value an <Obj> has for a given property name.
+		 * Logs an error if the given property name is not implemented.
+		 * Params:
+		 * obj - IGView's representation of a GOLMI <Obj>
+		 * prop - _str_, property name
+		 * Returns: _str_, value matching _obj_
+		 */
 		_findValue(obj, prop) {
 			switch(prop) {
 				case "shape":
@@ -848,10 +1033,12 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Construct a natural language description from collected property-value pairs.
-		 * @param {object mapping property names to values} propVals
-		 * @param {optional: pass true to produce a plural form, default: false}
-		 * @return string containing the values from propVals
+		 * Construct a natural language description from collected
+		 * property-value pairs.
+		 * Params:
+		 * propVals - object mapping property names to values
+		 * plural - _bool_, optional: pass true to produce a plural form
+		 * Returns: _str_, RE containing the values from _propVals_
 		 */
 		_verbalizeRE(propVals, plural=false) {
 			// property "id" is simply ignored
@@ -875,7 +1062,8 @@ $(document).ready(function () {
 				}
 			});
 			// if no shape given, use a generic noun
-			shape = shape ? shape : this.generalTypes[Math.floor(Math.random() * this.generalTypes.length)];
+			shape = shape ? shape :
+				this.generalTypes[Math.floor(Math.random() * this.generalTypes.length)];
 			// special case: hpos and vpos are the only properties, but the gripper
 			// is right above the piece so both have the value ""
 			
@@ -887,7 +1075,7 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Get the maximum value of salience any domain in RS has.
+		 * Get the maximum value of salience any <Domain> in RS has.
 		 */
 		_getMaxSalience() {
 			let maxS = 0;
@@ -904,12 +1092,18 @@ $(document).ready(function () {
 		// --- Simple feedback for REG algorithms that come without feedback function --- //
 		
 		/**
-		 * Dummy feedback algorithm to use for algorithms that don't come with a feedback
-		 * mechanism by default. Resorts to giving positive or negative signals when the user
-		 * is moving. If the user doesn't act, the reference algorithm is called to re-produce
-		 * a referring expression.
-		 * @param {if set to true, no additional checks will be made, default: false} force
-		 * @return natural language feedback expression or null
+		 * Func: simpleFeedback
+		 * Dummy feedback algorithm to use for algorithms that don't come with
+		 * a feedback mechanism by default. Resorts to giving positive or negative
+		 * signals when the user is moving. If the user doesn't act, the reference
+		 * algorithm is called to re-produce a referring expression (repeat type
+		 * feedback).
+		 *
+		 * Params:
+		 * force - _bool_, if set to true, no additional checks will be made
+		 *
+		 * Returns:
+		 * natural language feedback expression or null
 		 */
 		simpleFeedback(force=false) {
 			if (!force && !this._needFeedback()) {
@@ -933,18 +1127,27 @@ $(document).ready(function () {
 		}
 		
 		/**
-		 * Determines what direction in relation to the target the user has been moving recently.
-		 * return 1: towards target, -1: away from target, 0: no movement in feedbackTimeInt/2
+		 * Determines what direction in relation to the target the user
+		 * has been moving recently.
+		 * Returns:
+		 * 1: towards target, -1: away from target, 0: no movement in feedbackTimeInt/2
 		 */
 		_lastDirectionToTarget() {
 			if (this.gripperTrace.length < 2 ||
-				this.gripperTrace[this.gripperTrace.length-1][0] - this.gripperTrace[this.gripperTrace.length-2][0] > this.feedbackTimeInt/2) {
-				// if the user has not moved in the last feedbackTimeInt/2 ms, no focus seems to be set
+					this.gripperTrace[this.gripperTrace.length-1][0] -
+					this.gripperTrace[this.gripperTrace.length-2][0] >
+					this.feedbackTimeInt/2) {
+				// if the user has not moved in the last feedbackTimeInt/2 ms,
+				// no focus seems to be set
 				return 0;
 			}
 			// check if distance to target has been reduced by last movement:
-			let lastDist = document._vectorDist(this.gripperTrace[this.gripperTrace.length-2].slice(1), this.targetCoords);
-			let currentDist = document._vectorDist(this.gripperTrace[this.gripperTrace.length-1].slice(1), this.targetCoords);
+			let lastDist = document._vectorDist(
+				this.gripperTrace[this.gripperTrace.length-2].slice(1), this.targetCoords
+			);
+			let currentDist = document._vectorDist(
+				this.gripperTrace[this.gripperTrace.length-1].slice(1), this.targetCoords
+			);
 			if (currentDist < lastDist) {
 				return 1;
 			} else if (currentDist > lastDist) {
@@ -957,14 +1160,19 @@ $(document).ready(function () {
 		// --- REG algorithm with Reference Domain Theory by Denis (2010) --- //
 
 		/**
-		 * Feedback algorithm from:
-		 * Denis 2010: Generating Referring Expressions with Reference Domain Theory
-		 * (as given in Figure 4)
-		 * Feedback is emitted with respect to the current focus on objects from the most salient 
-		 * domain containing the target. The internal referential space will be updated with each 
-		 * generated feedback.
-		 * @param {if set to true, no additional checks will be made, default: false} force
-		 * @return natural language feedback expression or null
+		 * Func: RDTFeedback
+		 * Feedback algorithm from A. Denis 2010.
+		 * See <https://aclanthology.org/W10-4203.pdf>
+		 * (feedback algorithm given in Figure 4).
+		 * Feedback is emitted with respect to the current focus on objects
+		 * from the most salient <Domain> containing the target. The internal
+		 * referential space will be updated with each generated feedback.
+		 *
+		 * Params:
+		 * force - _bool_, if set to true, no additional checks will be made
+		 *
+		 * Returns:
+		 * natural language feedback expression or null
 		 */
 		RDTFeedback(force=false) {
 			// check if feedback is needed
@@ -998,12 +1206,15 @@ $(document).ready(function () {
 		}
 
 		/**
-		 * Selects from the given domain all objects in front / in moving direction of the gripper.
-		 * In the original paper, a different setting is used and visible objects are objects in the same
-		 * virtual room as the user. Here, all objects are always visible, so a different assumption is used:
-		 * The user focuses on objects they move the gripper towards.
-		 * @param {domain to filter for objects in focus} domain
-		 * @return set of objects 'in focus'
+		 * Selects from the given <Domain> all objects in front / in moving
+		 * direction of the gripper.
+		 * In the original paper, a different setting is used and visible
+		 * objects are objects in the same virtual room as the user.
+		 * Here, all objects are always visible, so a different assumption
+		 * is used: The user focuses on objects they move the gripper towards.
+		 * Params:
+		 * domain - <Domain> to filter for objects in focus
+		 * Returns: set of objects 'in focus'
 		 */
 		_getObjsInFocus(domain) {
 			if (this.gripperTrace.length <= 1) {
@@ -1012,20 +1223,24 @@ $(document).ready(function () {
 			} 
 
 			let inFocus = new Set(domain.ground);
-			// determine the moving direction (computed using the last two logged positions)
+			// determine the moving direction (computed using the last two
+			// logged positions)
 			let horizontalDir = this.getGripperX(-1) - this.getGripperX(-2);
 			let verticalDir = this.getGripperY(-1) - this.getGripperY(-2);
 
 			if (horizontalDir == 0 && verticalDir == 0) {
-				// if the user has not moved since last message, no focus seems to be set
+				// if the user has not moved since last message, no focus seems
+				// to be set
 				return new Set();
 			}
 			// if a direction is 0, no filters need to be applied
-			// otherwise, remove any objects 'behind' the current gripper position (or at the same height/width)
+			// otherwise, remove any objects 'behind' the current gripper
+			// position (or at the same height/width)
 			// filter for horizontal direction
 			if (horizontalDir > 0) {
 				inFocus.forEach(obj => {
-					if (this.getObjValue(obj, "x") + this.getObjValue(obj, "width") - this.getGripperX() < 0) {
+					if (this.getObjValue(obj, "x") + this.getObjValue(obj, "width") -
+							this.getGripperX() < 0) {
 						inFocus.delete(obj);
 					}
 				});
@@ -1039,7 +1254,8 @@ $(document).ready(function () {
 			// filter for vertical direction
 			if (verticalDir > 0) {
 				inFocus.forEach(obj => {
-					if (this.getObjValue(obj, "y") + this.getObjValue(obj, "height") - this.getGripperY() < 0) {
+					if (this.getObjValue(obj, "y") + this.getObjValue(obj, "height") -
+							this.getGripperY() < 0) {
 						inFocus.delete(obj);
 					}
 				});
@@ -1054,7 +1270,7 @@ $(document).ready(function () {
 		}
 		
 		/**
-		 * Remove any domain in the reference space that uses transient
+		 * Remove any <Domain> in the reference space that uses transient
 		 * properties in its semantic description or partition structure.
 		 */
 		_removeTransientDomains() {
@@ -1074,10 +1290,17 @@ $(document).ready(function () {
 		
 		// --- Supervised exploration --- //
 		/**
+		 * Func: SEFeedback
 		 * Feedback to be used on its own.
-		 * Produces instructions relative to the current gripper position.
-		 * @param {if set to true, no additional checks will be made, default: false} force
-		 * @return natural language feedback expression or null
+		 * Produces incremental instructions relative to the current gripper
+		 * position. See the thesis for details on the motivation of this
+		 * algorithm.
+		 *
+		 * Params:
+		 * force - _bool_, if set to true, no additional checks will be made
+		 *
+		 * Returns:
+		 * natural language feedback expression or null
 		 */
 		SEFeedback(force=false) {
 			// we need at least the start position
@@ -1098,7 +1321,9 @@ $(document).ready(function () {
 			// check if gripper is in the correct y range
 			let inYRange = this.getGripperY() > tThreshold && this.getGripperY() < bThreshold;
 			// check if gripper entered the y range with the last step
-			let justEnteredYRange = inYRange && this.gripperTrace.length > 1 && (this.getGripperY(-2) <= tThreshold || this.getGripperY(-2) >= bThreshold);
+			let justEnteredYRange = inYRange &&
+				this.gripperTrace.length > 1 &&
+				(this.getGripperY(-2) <= tThreshold || this.getGripperY(-2) >= bThreshold);
 
 			if ((justEnteredXRange && inYRange) || justEnteredYRange && inXRange) {
 				// instruct to grip if last user action brought the gripper close to the target
@@ -1106,10 +1331,12 @@ $(document).ready(function () {
 				return document.randomFromArray(this.instrStart) + " this object";
 			} else if (justEnteredXRange) {
 				// x axis is now correct, y axis not: give instruction for y direction
-				return "Stop. " + document.randomFromArray(["Go", "Move"]) + " " + this._yFeedback();
+				return "Stop. " + document.randomFromArray(["Go", "Move"]) + " " +
+					this._yFeedback();
 			} else if (justEnteredYRange) {
 				// x axis is now correct, y axis not: give instruction for y direction
-				return "Stop. " + document.randomFromArray(["Go", "Move"]) + " " + this._xFeedback();
+				return "Stop. " + document.randomFromArray(["Go", "Move"]) + " " +
+					this._xFeedback();
 			} else if (force || this._needFeedback()) {
 				// special case: instruction follower is ready to grip
 				if (inXRange && inYRange) {
@@ -1121,7 +1348,9 @@ $(document).ready(function () {
 				switch(this._lastDirectionToTarget()) {
 					case 1:
 						// moving towards target: give positive feedback
-						return document.randomFromArray(["Yes, this direction", "Yes", "Yeah", "Yes, this way"]);
+						return document.randomFromArray([
+							"Yes, this direction", "Yes", "Yeah", "Yes, this way"
+						]);
 					case -1:
 						// moving away from target: negative feedback + adjustment
 						return "No. " + document.randomFromArray(["Go", "Move"]) + " " +
@@ -1138,7 +1367,9 @@ $(document).ready(function () {
 		}
 		
 		/**
-		 * @return feedback to the horizontal difference between gripper and target object
+		 * Generate horizontal feedback for SEFeedback.
+		 * Returns:
+		 * feedback to the horizontal distance between <Gripper> and target
 		 */
 		_xFeedback() {
 			let feedback = "";
@@ -1162,7 +1393,9 @@ $(document).ready(function () {
 		}
 		
 		/**
-		 * @return feedback to the vertical difference between gripper and target object
+		 * Generate horizontal feedback for SEFeedback.
+		 * Returns:
+		 * feedback to the vertical distance between <Gripper> and target
 		 */
 		_yFeedback() {
 			let feedback = "";
@@ -1189,9 +1422,11 @@ $(document).ready(function () {
 		// --- Feedback helper functions used by multiple algorithms --- //
 
 		/**
-		 * Check whether to give feedback to the user at the current time. The decision is
-		 * based on the user's progress since the last message.
-		 * @return bool, true if feedback should be emitted
+		 * Check whether to give feedback to the user at the current time.
+		 * The decision is based on the user's progress since the last
+		 * message.
+		 * Returns:
+		 * _bool_, true if feedback should be emitted
 		 */
 		_needFeedback() {
 			// no message has been given to the user yet, so no initial instruction either -> no feedback
@@ -1199,8 +1434,11 @@ $(document).ready(function () {
 			// criteria for feedback:
 			// 1. user moved the gripper a predefined distance since last communication
 			// 2. no other messages in the queue
-			return document._vectorDist(this.gripperTrace[this.gripperTrace.length-1].slice(1), this.gripperTrace[0].slice(1)) >= this.feedbackDistInt &&
-				!this._hasPendingMsg();
+			let distanceCrossed = document._vectorDist(
+				this.gripperTrace[this.gripperTrace.length-1].slice(1),
+				this.gripperTrace[0].slice(1)
+			);
+			return (distanceCrossed >= this.feedbackDistInt) && !this._hasPendingMsg();
 		}
 
 	}; // class IGView end

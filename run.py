@@ -1,10 +1,15 @@
+"""File: run.py
+Entrypoint for the GOLMI server application.
+Call with -h option for more information on the command line options.
+Runs on host 127.0.0.1 and port 5000 per default.
+--test option currently not implemented.
+
+Usage:
+	> run.py [-h] [--host HOST] [--port PORT] [--test]
+"""
+
 import argparse
 from app import app, socketio, test
-
-# --- GOLMi's server --- # 
-# author: clpresearch, Karla Friedrichs
-# usage: python3 run.py [-h] [--host HOST] [--port PORT] [--test]
-# Runs on host 127.0.0.1 and port 5000 per default
 
 # --- command line arguments ---
 parser = argparse.ArgumentParser(description="Run GOLMI's model API.")
@@ -19,6 +24,9 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	if args.test:
 		# will throw errors if something fails
-		test.selftest()
-		print("All tests passed.")
+		# TODO: Golmi has not yet updated its unit tests, uncomment
+		# this line to re-introduce the option.
+		#test.selftest()
+		#print("All tests passed.")
+		print("Warning: Selftest currently not implemented.")
 	socketio.run(app, host=args.host, port=args.port)

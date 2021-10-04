@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("det",["Function"],[["detachModel",,[["LocalKeyController",,,,0,"File:app/static/js/controller/LocalKeyController.js:LocalKeyController.detachModel","JavaScriptClass:LocalKeyController:detachModel"]]]]);

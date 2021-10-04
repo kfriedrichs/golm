@@ -1,11 +1,14 @@
-"""Skript to generate spoken instructions using Amazon Polly
+"""File: create_instr_audio.py
+Skript to generate spoken instructions using Amazon Polly
 
 Author:
 	Karla Friedrichs
-Skript to bachelor thesis:
+	
+Skript To Bachelor Thesis:
 	"Modeling collaborative reference in a Pentomino domain using the GOLMI framework"
+
 Usage:
-	python3 create_instr_audio.py [-h] -f FILE -o OUT_DIR
+	> python3 create_instr_audio.py [-h] -f FILE -o OUT_DIR
 """
 import argparse
 from boto3 import Session
@@ -13,14 +16,18 @@ from contextlib import closing
 import os
 
 def synthesize_instr_audios(instruction_file, out_dir):
-	"""Create audios for a list of instructions.
-
+	"""Func: synthesize_instr_audios
+	
+	Create audios for a list of instructions.
+	
 	The given file should contain one instruction per line. Duplicates are
 	removed. An audio is created for each line, using Amazon Polly's
 	'Matthew' voice. The audios are saved in separate files, the content in
 	lowercase and with removed special characters as a file name.
-	@param instruction_file	file containing one instruction per line
-	@param out_dir	directory to save the resulting audio files to
+	
+	Params:
+	instruction_file - file containing one instruction per line
+	out_dir - directory to save the resulting audio files to
 	"""
 	# read in instructions, remove newlines and duplicates
 	special_chars = [" ", ",", ".", "'", "!", "?"]

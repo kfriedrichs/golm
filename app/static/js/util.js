@@ -1,8 +1,19 @@
+/**
+ * File: util.js
+ * Contains helper functions for arrays and sets.
+ */
+
 $(document).ready(function () {
 	/**
+	 * Func: _vectorDist
 	 * Compute the Euclidian distance between two vectors.
-	 * @param {first vector, needs to have same dimensions as vector2} vector1
-	 * @param {second vector, needs to have same dimensions as vector1} vector2
+	 *
+	 * Params:
+	 * vector1 - first vector, needs to have same dimensions as vector2
+	 * vector2 - second vector, needs to have same dimensions as vector1
+	 *
+	 * Returns:
+	 * Euclidian distance
 	 */
 	document._vectorDist = function(vector1, vector2) {
 		if (vector1.length != vector2.length) {
@@ -19,9 +30,14 @@ $(document).ready(function () {
 	
 	// --- array helper functions --- //
 	/**
+	 * Func: randomFromArray
 	 * Choose a random element from an array.
-	 * @param {array to select an element from} array
-	 * @return randomly selected element
+	 *
+	 * Params:
+	 * array - array to select an element from
+	 *
+	 * Returns:
+	 * randomly selected element
 	 */
 	document.randomFromArray = function(array) {
 		return array[Math.floor(Math.random() * array.length)];
@@ -29,11 +45,16 @@ $(document).ready(function () {
 
 	// --- set helper functions --- //
 	/**
+	 * Func: setEquals
 	 * Check if two sets have the exact same contents.
-	 * (Equality of entries is checked using the Set.has() function)
-	 * @param {first set to check} set1
-	 * @param {second set to check} set2
-	 * @return bool, true if sets have the same size and contain the same elements.
+	 * (Equality of entries is checked using the *Set.has()* function)
+	 *
+	 * Params:
+	 * set1 - first set to check
+	 * set2 - second set to check
+	 *
+	 * Returns:
+	 * _bool_, true if sets have the same size and contain the same elements.
 	 */
 	document.setEquals = function(set1, set2) {
 		// check size
@@ -46,11 +67,16 @@ $(document).ready(function () {
 	}
 
 	/**
+	 * Func: isSuperset
 	 * Check if all elements given in the second set also occur in the first set.
-	 * (Equality of entries is checked using the Set.has() function)
-	 * @param {set that is to contain all elements of subSet} superSet
-	 * @param {set whose entries are to be contained by superSet} subSet
-	 * @return bool, true if there is a superset relation
+	 * (Equality of entries is checked using the *Set.has()* function)
+	 *
+	 * Params:
+	 * superSet - set that is to contain all elements of subSet
+	 * subSet - set whose entries are to be contained by superSet
+	 *
+	 * Returns:
+	 * _bool_, true if there is a superset relation
 	 */
 	document.isSuperset = function(superSet, subSet) {
 		// check size

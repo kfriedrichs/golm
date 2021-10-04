@@ -1,3 +1,7 @@
+"""File: test.py
+Currently not in use.
+"""
+
 # TODO: update these for socketio
 
 def selftest(): 

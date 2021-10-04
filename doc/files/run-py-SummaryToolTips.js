@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("File:run.py",{114:"<div class=\"NDToolTip TFile LPython\"><div class=\"TTSummary\">Entrypoint for the GOLMI server application.&nbsp; Call with -h option for more information on the command line options.&nbsp; Runs on host 127.0.0.1 and port 5000 per default.&nbsp; --test option currently not implemented.</div></div>"});

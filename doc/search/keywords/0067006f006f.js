@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("goo",["Function"],[["goodbye",,[["IGView",,,,0,"File:app/static/js/view/IGView.js:IGView.goodbye","JavaScriptClass:IGView:goodbye"]]]]);

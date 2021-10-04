@@ -1,11 +1,30 @@
+"""File: model.py
+
+Contains the class Model.
+"""
+
 from model.state import State
 from model.gripper import Gripper
 from model.obj import Obj
 from math import floor, ceil 
 import time, threading
 
+"""Class: Model
+Represents the server-side state and logic.
+Comprises a snapshot of the current <Obj>s, <Gripper>s and <Config>.
+Handles changes requested from Controllers, will check whether actions
+are valid and delegate necessary changes to its <State> instance.
+For relevant updates, socket events are emitted to the model's room.
+"""
 class Model:
 	def __init__(self, config, socket, room):
+		"""Func: Constructor
+		
+		Params:
+		config - <Config> instance
+		socket - flask_socketio.SocketIO instance that views can connect with
+		room - name of the socket room this <Model> is assigned to
+		"""
 		self.socket = socket # to communicate with subscribed views
 		self.room = room
 		self.state = State()
@@ -16,65 +35,135 @@ class Model:
 		self.stop_events = {"move": dict(), "grip": dict(), "flip": dict(), "rotate": dict()}
 
 	# --- getter --- #
-
+	
 	def get_obj_dict(self):
-		return self.state.get_obj_dict()
-
-	def get_object_ids(self):
-		return self.state.get_object_ids()
-
-	def get_obj_by_id(self, id):
-		return self.state.get_obj_by_id(id)
-
-	def get_gripper_dict(self):
-		return self.state.get_gripper_dict()
-
-	def get_gripper_ids(self):
-		return self.state.get_gripper_ids()
-
-	def get_gripper_by_id(self, id):
+		""" Func: get_obj_dict
+		
+		Returns:
+		dictionary mapping <Obj> ids to <Obj> dictionaries
 		"""
-		@return Gripper instance or None if id is not registered
+		return self.state.get_obj_dict()
+# Section:
+	def get_object_ids(self):
+		""" Func: get_obj_ids
+		
+		Returns:
+		iterable of the <Obj>s' ids
+		"""
+		return self.state.get_object_ids()
+# Section:
+	def get_obj_by_id(self, id):
+		""" Func: get_obj_by_id
+		
+		Params:
+		id - registered identifier of the <Obj> to retrieve
+		
+		Returns:
+		<Obj> instance, if existing, else None
+		"""
+		return self.state.get_obj_by_id(id)
+# Section:
+	def get_gripper_dict(self):
+		"""Func: get_gripper_dict
+		
+		Returns:
+		dictionary mapping <Gripper> ids to <Gripper> dictionaries
+		"""
+		return self.state.get_gripper_dict()
+# Section:
+	def get_gripper_ids(self):
+		"""Func: get_gripper_ids
+		
+		Returns:
+		iterable of the <Gripper>s' ids
+		"""
+		return self.state.get_gripper_ids()
+# Section:
+	def get_gripper_by_id(self, id):
+		"""Func: get_gripper_by_id
+		
+		Params:
+		id - registered identifier of the <Gripper> to retrieve
+		
+		Returns:
+		<Gripper> instance, if existing, else None
 		"""
 		return self.state.get_gripper_by_id(id)
-
-	def get_gripped_obj(self, id):
-		return self.state.get_gripped_obj(id)
-
+# Section:
 	def get_gripper_coords(self, id):
-		"""
-		@return list: [x-coordinate, y-coordinate]
+		"""Func: get_gripper_coords
+		
+		Params:
+		id - registered identifier of the <Gripper> in question
+		
+		Returns:
+		_list_: [x, y] or empty list if id does not exist
 		"""
 		return self.state.get_gripper_coords(id)
-
+# Section:
+	def get_gripped_obj(self, id):
+		"""Func: get_gripped_obj
+		
+		Params:
+		id - registered identifier of the <Gripper> in question
+		
+		Returns:
+		None or the id of the gripped <Obj>
+		"""
+		return self.state.get_gripped_obj(id)
+# Section:
 	def get_config(self):
+		"""Func: get_config
+		
+		Returns:
+		dictionary representation of the internal <Config> instance
+		"""
 		return self.config.to_dict()
-
+# Section:
 	def get_width(self):
+		"""Func: get_width
+		
+		Returns:
+		the world's width in blocks, defined by the internal <Config>
+		"""
 		return self.config.width
-
+# Section:
 	def get_height(self):
+		"""Func: get_height
+		
+		Returns:
+		the world's height in blocks, defined by the internal <Config>
+		"""
 		return self.config.height
-
+# Section:
 	def get_type_config(self):
+		"""Func: get_type_config
+		
+		Returns:
+		the <Config>'s type name -> block matrix map
+		"""
 		return self.config.type_config
 
 	# --- Communicating with views --- # 
 
 	def _notify_views(self, event_name, data):
-		"""
+		"""Func: notify_views
 		Notify all listening views of model events (usually data updates)
-		@param event_name 	str: event type, e.g. "update_grippers"
-		@param data 	serializable data to send to listeners
+		
+		Params:
+		event_name - _str_, event type, e.g. 'update_grippers'
+		data - serializable data to send to listeners
 		"""
 		self.socket.emit(event_name, data, room=self.room)
 
 	# --- Set up and configuration --- #
 
 	def set_state(self, state):
-		"""
-		Initialize the model's (game) state.
-		@param state	State object or dict or JSON string
+		"""Func: set_state
+		Initialize the model's state. Emits 'update_state' event.
+		
+		Params:
+		state - <State> object or dict or JSON string
 		"""
 		# state is a JSON string or parsed JSON dictionary
 		if type(state) == str or type(state) == dict:
@@ -85,10 +174,13 @@ class Model:
 		self._notify_views("update_state", self.state.to_dict())
 
 	def set_config(self, config):
-		"""
-		Change the model's configuration. Overwrites any attributes
-		passed in config and leaves the rest as before. New keys simply added.
-		@param config	Config object or dict or JSON string
+		"""Func: set_config
+		Change the <Model>'s configuration. Overwrites any attributes
+		passed in _config_ and leaves the rest as before. New keys are added.
+		Emits 'update_config' event.
+		
+		Params:
+		config - <Config> or dict or JSON string
 		"""
 		# config is a JSON string or parsed JSON dictionary
 		if type(config) == str or type(config) == dict:
@@ -99,13 +191,12 @@ class Model:
 		self._notify_views("update_config", self.config.to_dict())
 
 	def reset(self):
-		"""
-		Reset the current state.
+		"""Func: reset
+		Reset the current <State>. Emits 'update_state' event.
 		"""
 		self.state = State()
 		self._notify_views("update_state", self.state.to_dict())
 
-	# TODO: make sure pieces are on the board! (at least emit warning)
 	def _state_from_JSON(self, json_data):
 		if type(json_data) == str:
 			# a JSON string
@@ -169,9 +260,12 @@ class Model:
 	# --- Gripper manipulation --- #
 
 	def add_gr(self, gr_id):
-		"""
-		Add a new gripper to the internal state. The start position is the center. Notifies listeners.
-		@param gr_id 	identifier for the new gripper
+		"""Func: add_gr
+		Add a new <Gripper> to the internal <State>.
+		The start position is the center. Emits 'update_grippers' event.
+		
+		Params:
+		gr_id - identifier for the new <Gripper>
 		"""
 		start_x = self.get_width()/2
 		start_y = self.get_height()/2
@@ -181,34 +275,44 @@ class Model:
 			self._notify_views("update_grippers", self.get_gripper_dict())
 
 	def remove_gr(self, gr_id):
-		"""
-		Delete a gripper from the internal state and notify listeners.
-		@param gr_id 	identifier of the gripper to remove
+		"""Func: remove_gr
+		Delete a <Gripper> from the internal <State>.
+		Emits 'update_grippers' event.
+		
+		Params:
+		gr_id - identifier of the <Gripper> to remove
 		"""
 		if gr_id in self.state.grippers:
 			self.state.grippers.pop(gr_id)
 			self._notify_views("update_grippers", self.get_gripper_dict())
 
 	def start_gripping(self, id):
-		"""
-		Start calling the function grip periodically until stop_gripping is called, essentially 
-		repeatedly gripping / ungripping with a specified gripper.
-		@param id 	gripper id
+		"""Func: start_gripping
+		Start calling the function <grip> periodically until
+		<stop_gripping> is called, essentially repeatedly
+		gripping / ungripping with a specified <Gripper>.
+		
+		Params:
+		id - <Gripper> id
 		"""
 		self.stop_gripping(id)
 		self.start_loop("grip", id, self.grip, id)
 
 	def stop_gripping(self, id):
-		"""
+		"""Func: stop_gripping
 		Stop periodically gripping.
-		@param id 	gripper id
+		
+		Params:
+		id - <Gripper> id
 		"""
 		self.stop_loop("grip", id)
 
 	def grip(self, id):
-		"""
+		"""Func: grip
 		Attempt a grip / ungrip.
-		@param id 	gripper id
+		
+		Params:
+		id - <Gripper> id
 		"""
 		# if some object is already gripped, ungrip it
 		old_gripped = self.get_gripped_obj(id)
@@ -229,32 +333,45 @@ class Model:
 				self._notify_views("update_grippers", self.get_gripper_dict())
 
 	def start_moving(self, id, x_steps, y_steps, step_size=None):
-		"""
-		Start calling the function move periodically until stop_moving is called.
-		@param id 	gripper id
-		@param x_steps	steps to move in x direction. Step size is defined by model configuration
-		@param y_steps	steps to move in y direction. Step size is defined by model configuration
-		@param step_size 	Optional: size of step unit in blocks. Default: use move_step of config
+		"""Func: start_moving
+		Start calling the function <move> periodically until <stop_moving> is called.
+		
+		Params:
+		id - <Gripper> id
+		x_steps - steps to move in x direction.
+			Step size is defined by _step_size_ or the internal <Config>.
+		y_steps - steps to move in y direction.
+			Step size is defined by _step_size_ or the internal <Config>.
+		step_size - optional: size of moving step in blocks;
+			*default*: use move_step of internal <Config>
 		"""
 		# cancel any ongoing movement
 		self.stop_moving(id)
 		self.start_loop("move", id, self.move, id, x_steps, y_steps, step_size)
 
 	def stop_moving(self, id):
-		"""
+		"""Func: stop_moving
 		Stop calling move periodically.
-		@param id 	gripper id
+		
+		Params:
+		id - <Gripper> id
 		"""
 		self.stop_loop("move", id)
 
 	def move(self, id, x_steps, y_steps, step_size=None):
-		"""
-		If allowed, move the gripper x_steps steps in x direction and y_steps steps in y direction.
-		Only executes if the goal position is inside the game dimensions. Notifies views of change.
-		@param id 	gripper id
-		@param x_steps	steps to move in x direction. Step size is defined by model configuration
-		@param y_steps	steps to move in y direction. Step size is defined by model configuration
-		@param step_size 	Optional: size of step unit in blocks. Default: use move_step of config
+		"""Func: move
+		If allowed, move the <Gripper> x_steps steps in x direction
+		and y_steps steps in y direction. Only executes if the goal
+		position is inside the game dimensions. Emits 'update_grippers' event.
+		
+		Params:
+		id - <Gripper> id
+		x_steps - steps to move in x direction.
+			Step size is defined by _step_size_ or the internal <Config>.
+		y_steps - steps to move in y direction.
+			Step size is defined by _step_size_ or the internal <Config>.
+		step_size - optional: size of moving step in blocks;
+			*default*: use move_step of internal <Config>
 		"""
 		# if no step_size was given, query the config
 		if not step_size: step_size = self.config.move_step
@@ -284,29 +401,38 @@ class Model:
 			self._notify_views("update_grippers", self.get_gripper_dict())
 
 	def start_rotating(self, id, direction, step_size=None):
-		"""
-		Start calling the function rotate periodically until stop_rotating is called.
-		@param id 	id of the gripper whose gripped object should be rotated
-		@param direction	-1 for leftwards rotation, 1 for rightwards rotation
-		@param step_size	Optional: angle to rotate per step. Default: use rotation_step of config
+		"""Func: start_rotating
+		Start calling the function <rotate> periodically until
+		<stop_rotating> is called.
+		
+		Params:
+		id - id of the <Gripper> whose gripped <Obj> should be rotated
+		direction - -1 for leftwards rotation, 1 for rightwards rotation
+		step_size - optional: angle to rotate per step;
+			*default*: use rotation_step of internal <Config>
 		"""
 		# cancel any ongoing rotation
 		self.stop_rotating(id)
 		self.start_loop("rotate", id, self.rotate, id, direction, step_size)
 
 	def stop_rotating(self, id):
-		"""
+		"""Func: stop_rotating
 		Stop calling rotate periodically.
-		@param id 	gripper id
+		
+		Params:
+		id - <Gripper> id
 		"""
 		self.stop_loop("rotate", id)
 
 	def rotate(self, id, direction, step_size=None):
-		"""
-		If the gripper 'id' currently grips some object, rotate this object one step.
-		@param id 	id of the gripper whose gripped object should be rotated
-		@param direction	-1 for leftwards rotation, 1 for rightwards rotation
-		@param step_size	Optional: angle to rotate per step. Default: use rotation_step of config
+		"""Func: rotate
+		If the <Gripper> 'id' currently grips some <Obj>, rotate it one step.
+		
+		Params:
+		id - id of the <Gripper> whose gripped <Obj> should be rotated
+		direction - -1 for leftwards rotation, 1 for rightwards rotation
+		step_size - optional: angle to rotate per step;
+			*default*: use rotation_step of internal <Config>
 		"""
 		# check if an object is gripped
 		gr_obj_id = self.get_gripped_obj(id) 
@@ -324,25 +450,32 @@ class Model:
 				self._notify_views("update_grippers", self.get_gripper_dict())
 
 	def start_flipping(self, id):
-		"""
-		Start calling the function flip periodically until stop_flipping is called.
-		@param id 	id of the gripper whose gripped object should be flipped
+		"""Func: start_flipping
+		Start calling the function <flip> periodically until
+		<stop_flipping> is called.
+		
+		Params:
+		id - id of the <Gripper> whose gripped <Obj> should be flipped
 		"""
 		# cancel any ongoing flipping
 		self.stop_flipping(id)
 		self.start_loop("flip", id, self.flip, id)
 
 	def stop_flipping(self, id):
-		"""
-		Stop calling flip periodically.
-		@param id 	gripper id
+		"""Func: stop_flipping
+		Stop calling <flip> periodically.
+		
+		Params:
+		id - <Gripper> id
 		"""
 		self.stop_loop("flip", id)
 
 	def flip(self, id):
-		"""
-		Mirror the object currently gripped by some gripper.
-		@param id 	gripper id
+		"""Func: flip
+		Mirror the <Obj> currently gripped by the given <Gripper>.
+		
+		Params:
+		id - <Gripper> id
 		"""
 		# check if an object is gripped
 		gr_obj_id = self.get_gripped_obj(id) 
@@ -357,9 +490,9 @@ class Model:
 		
 	def _get_grippable(self, gr_id):
 		"""
-		Find an object that is in the range of the gripper.
-		@param id 	gripper id 
-		@return id of object to grip or None
+		Find an object that is in the range of the <Gripper>.
+		id - <Gripper> id
+		Returns: id of <Obj> to grip or None
 		"""
 		# Gripper position. It is just a point.
 		x, y = self.get_gripper_coords(gr_id)
@@ -381,37 +514,38 @@ class Model:
 	def _is_in_limits(self, x, y):
 		"""
 		Check whether given coordinates are within the space limits.
-		@param x 	x coordinate to check
-		@param y 	y coordinate to check
-		@return true if both coordinates are on the board
+		x - x coordinate to check
+		y - y coordinate to check
+		Returns: True if both coordinates are on the board
 		"""
 		return self._x_in_limits(x) and self._y_in_limits(y)
 		
 	def _x_in_limits(self, x):
 		"""
 		Check whether given x coordinate is within the space limits.
-		@param x 	x coordinate to check
-		@return true if the x coordinate is on the board
+		x - x coordinate to check
+		Returns: True if the x coordinate is on the board
 		"""
 		return (x >= 0 and x<= self.get_width())
 		
 	def _y_in_limits(self, y):
 		"""
 		Check whether given y coordinate is within the space limits.
-		@param y 	y coordinate to check
-		@return true if the y coordinate is on the board
+		y - y coordinate to check
+		Returns: True if the y coordinate is on the board
 		"""
 		return (y >= 0 and y <= self.get_height())
 
 	# this function is extremely unelegant. feel free to change for a better implementation!
 	def _has_overlap(self, obj_id, x, y, block_matrix):
 		"""
-		Check whether an object would have an overlap with another object if it were placed at (x,y).
-		@param obj_id 	id of the object to check the given position for
-		@param x 	x coordinate to check for the object
-		@param y 	y coordinate to check for the object
-		@param block_matrix 	0/1 matrix describing the shape of the object
-		@return true if there is some overlap with another object
+		Check whether an <Obj> would have an overlap with another
+		<Obj> if it were placed at (x,y).
+		obj_id - id of the <Obj> to check the given position for
+		x - x coordinate to check for _obj_id_
+		y - y coordinate to check for _obj_id_
+		block_matrix - 0/1 matrix describing the shape of _obj_id_
+		Returns: True if there is some overlap with another <Obj>
 		"""
 		this_height = len(block_matrix)
 		if this_height == 0:
@@ -459,19 +593,27 @@ class Model:
 	# --- Loop functionality ---
 
 	def start_loop(self, action_type, gripper, fn, *args, **kwargs):
-		# 
+		"""Func: start_loop
+		Currently not in use.
+		"""
 		self.stop_events[action_type][gripper] = threading.Event()
 		self.socket.start_background_task(
 			self._setInterval, self.config.action_interval, self.stop_events[action_type][gripper],
 			fn, *args, **kwargs)
 
 	def stop_loop(self, action_type, gripper):
+		"""Func: stop_loop
+		Currently not in use.
+		"""
 		if gripper in self.stop_events[action_type] and \
 			not self.stop_events[action_type][gripper].is_set():
 			
 			self.stop_events[action_type][gripper].set()
 
 	def _setInterval(self, interval, stop_event, fn, *args, **kwargs):
+		"""
+		Currently not in use.
+		"""
 		# immediately execute once
 		fn(*args, **kwargs)
 		next_time = time.time() + interval

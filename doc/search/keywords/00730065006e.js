@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("sen",["Function"],[["sendData",,[["LogView",,,,0,"File:app/static/js/view/LView.js:LogView.sendData","JavaScriptClass:LogView:sendData"]]]]);

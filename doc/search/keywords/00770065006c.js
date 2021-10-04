@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("wel",["Function"],[["welcome",,[["IGView",,,,0,"File:app/static/js/view/IGView.js:IGView.welcome","JavaScriptClass:IGView:welcome"]]]]);

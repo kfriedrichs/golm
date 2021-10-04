@@ -1,0 +1,1 @@
+﻿NDContentPage.OnToolTipsLoaded({15:"<div class=\"NDToolTip TClass LPython\"><div class=\"NDClassPrototype\" id=\"NDClassPrototype15\"><div class=\"CPEntry TClass Current\"><div class=\"CPName\">Config</div></div></div><div class=\"TTSummary\">Class to store settings such as board width, allowable actions, etc.</div></div>"});

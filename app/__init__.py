@@ -1,3 +1,8 @@
+"""File: __init__.py
+Creates the Flask (SocketIO) app to GOLMI, configures keys and
+paths for the app and defines the server-side event listeners.
+"""
+
 from flask import Flask, request, session
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, send, emit, ConnectionRefusedError, join_room

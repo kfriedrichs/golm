@@ -24,6 +24,10 @@ Per default, it will run on `http://localhost:5000/`
 3. Navigate to  `http://localhost:5000/` in a browser.
 4. Follow the instructions.
 
+### Documentation
+
+Open `doc/index.html` in a browser for a structured documentation of all files and classes.
+
 ### Code to the interface
 
 The client-side interface is set up in `golm/app/static/js/index.js` 

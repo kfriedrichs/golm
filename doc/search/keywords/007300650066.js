@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("sef",["Function"],[["SEFeedback",,[["IGView",,,,0,"File:app/static/js/view/IGView.js:IGView.SEFeedback","JavaScriptClass:IGView:SEFeedback"]]]]);

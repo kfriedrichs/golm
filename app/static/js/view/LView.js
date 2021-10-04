@@ -1,11 +1,26 @@
+/**
+ * File: LView
+ * Contains the <LogView> class.
+ * The file was named LView instead of LogView because some Browsers / AdBlockers
+ * would block loading the script.
+ */
+
 $(document).ready(function () {
 	/**
-	 * Logger class. Relies on events exchanged between a specific client and server.
-	 * Starts logging as soon as the client receives the first state
-	 * @param {Socket io connection to the server} modelSocket
-	 * @param {set true to save the full state at every change, false to only log the update}
+	 * Class: LogView
+	 * Logger class. Relies on events exchanged between a client and server.
+	 * Starts logging as soon as the client receives the first state.
 	 */
 	this.LogView = class LogView {
+		/**
+		 * Func: Constructor
+		 * Initializes listeners to socket and document events.
+		 *
+		 * Params:
+		 * modelSocket - Socket io connection to the server
+		 * logFullState - set true to save the full state at every change,
+		 *	false to only log the update
+		 */
 		constructor(modelSocket, logFullState=true) {
 			this.socket = modelSocket;
 
@@ -21,7 +36,8 @@ $(document).ready(function () {
 			// start listening to events
 			this._initEventListeners();
 		}
-
+		
+		// Initialize listeners to socket and document events
 		_initEventListeners() {
 			// register socket event listeners
 			this._initSocketEvents();
@@ -72,10 +88,6 @@ $(document).ready(function () {
 					this.currentGrippers = state["grippers"];
 					this._addSnapshot(timeOffset, this._getFullState());
 				}
-				// uncomment to log the state
-				//else {
-				//	this._addSnapshot(timeOffset, state);
-				//}
 			})
 			this.socket.on("update_grippers", (grippers) => {
 				if (this.startTime) {
@@ -110,10 +122,6 @@ $(document).ready(function () {
 						this.currentObjs = objs;
 						this._addSnapshot(timeOffset, this._getFullState());
 					}
-					// uncomment this to log object changes
-					//else {
-					//	this._addSnapshot(timeOffset, {"objs": objs});
-					//}
 				}
 			});
 			this.socket.on("update_config", (config) => {
@@ -137,11 +145,14 @@ $(document).ready(function () {
 
 		// --- add, change, delete data --- // 
 
-		/** 
+		/**
+		 * Func: addSegment
 		 * Make a cut and store the data logged so far (or since the last segment) as a 
-		 * segment with key segmentTitle. Optionally add some extra info to the segment.
-		 * @param {key to store the logged data with, can not be "log"} segmentTitle
-		 * @param {optional data object to store with the new segment, default: null} additionalData
+		 * segment with key _segmentTitle_. Optionally add some extra info to the segment.
+		 *
+		 * Params:
+		 * segmentTitle - key to store the logged data with, 'log' is reserved
+		 * additionalData - optional data object to store with the new segment
 		 */
 		addSegment(segmentTitle, additionalData=null) {
 			if (segmentTitle == "log") {
@@ -163,10 +174,13 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: addData
 		 * Add additional data to the current log. Will be saved at 
 		 * the top-level of the log object.
-		 * @param {string, identifier for the data, 'log' is reserved} key
-		 * @param {data to save, can be any json-friendly format, e.g. object, list, string} data
+		 *
+		 * Params:
+		 * key - _str_, identifier for _data_, 'log' is reserved
+		 * data - data to save, can be any json-friendly format, e.g. object, array, _str_
 		 */
 		addData(key, data) {
 			if (key == "log") {
@@ -178,10 +192,13 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: addDataToSegment
 		 * Save additional data to an already created segment.
-		 * @param {name of an existing segment to save the data to} segment
-		 * @param {string, identifier for the data, 'log' is reserved} key
-		 * @param {data to save, can be any json-friendly format, e.g. object, list, string} data
+		 *
+		 * Params:
+		 * segment - name of an existing segment to save the _data_ to
+		 * key - string, identifier for _data_, 'log' is reserved
+		 * data - data to save, can be any json-friendly format, e.g. object, array, _str_
 		 */
 		addDataToSegment(segment, key, data) {
 			if (!this.data[segment]) {
@@ -195,6 +212,7 @@ $(document).ready(function () {
 		}
 
 		/**
+		 * Func: clearLog
 		 * Delete the current log and reset the saved state except for the configuration.
 		 */
 		clearLog() {
@@ -207,9 +225,14 @@ $(document).ready(function () {
 		// --- save data --- // 
 
 		/**
-		 * Save the data on the server.
-		 * @param {route to POST the collected data to, default: /save_log} endpoint
-		 * @return true at success
+		 * Func: sendData
+		 * Save the data on the server. Logs success message to the console.
+		 *
+		 * Params:
+		 * endpoint - GOLMI route to POST the collected data to
+		 *
+		 * Returns:
+		 * true at success
 		 */
 		sendData(endpoint="/save_log") {
 			fetch(new Request(endpoint, {
@@ -230,7 +253,8 @@ $(document).ready(function () {
 		// --- helper functions --- //
 
 		/**
-		 * @return a state object containing the objects, grippers and config as received last
+		 * Returns:
+		 * a state object containing the objects, grippers and config as received last
 		 */
 		_getFullState() {
 			return {"objs": this.currentObjs,
@@ -240,8 +264,10 @@ $(document).ready(function () {
 
 		/**
 		 * Add a single data update with a timestamp to the log.
-		 * @param {timestamp to associate the data with, e.g. time passed since log start} timestamp
-		 * @param {update to save} data
+		 * Params:
+		 * timestamp - timestamp to associate the _data_ with,
+		 *	e.g. time passed since log start
+		 * data - update to save
 		 */
 		_addSnapshot(timestamp, data) {
 			this.data["log"].push([timestamp, data]);

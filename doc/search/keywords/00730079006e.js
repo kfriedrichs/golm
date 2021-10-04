@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("syn",["Function"],[["synthesize_instr_audios",,[[,,,,0,"File:scripts/create_instr_audio.py:synthesize_instr_audios"]]]]);

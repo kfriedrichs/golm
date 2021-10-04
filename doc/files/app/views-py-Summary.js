@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("File:app/views.py","views.py");NDSummary.OnSummaryLoaded("File:app/views.py",[["Python","Python"]],[["Files","File"],["Functions","Function"],["Groups","Group"]],[[142,0,0,"views.py","views.py"],[143,0,2,"Functions","Functions"],[147,0,1,"index","index"],[145,0,1,"tasks","tasks"],[146,0,1,"save_log","save_log"]]);

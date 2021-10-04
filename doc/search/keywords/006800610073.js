@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("has",["Property"],[["hasStarted",,[["IGView",,,,0,"File:app/static/js/view/IGView.js:IGView.hasStarted","JavaScriptClass:IGView:hasStarted"]]]]);

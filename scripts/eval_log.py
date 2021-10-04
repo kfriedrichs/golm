@@ -1,11 +1,14 @@
-"""Skript to evaluate the task logs.
+"""File: eval_log.py
+Skript to evaluate the task logs.
 
 Author:
 	Karla Friedrichs
-Evaluation skript to bachelor thesis:
+
+Evaluation Skript To Bachelor Thesis:
 	"Modeling collaborative reference in a Pentomino domain using the GOLMI framework"
+
 Usage:
-	python3 eval_log.py
+	> python3 eval_log.py
 """
 
 import os
@@ -16,29 +19,48 @@ from plot_helper import create_line
 
 ### globals ###
 
+# Variable: DATA_COLLECTION_PATH
 # directory containing json files, one per participant
 DATA_COLLECTION_PATH = "./app/static/resources/data_collection"
+# Variable: PLOT_PATH
 # directory to save created plots to
 PLOT_PATH = "./resources/plots"
 
+# Variable: N_TASKS
+# number of tasks, used to evaluate all tasks with indes up to N_TASKS
 N_TASKS = 12
+# Variable: AMBIG_TASKS
+# list of ambiguous tasks (see thesis)
 AMBIG_TASKS = [1, 5, 6, 9, 10, 11]
+# Variable: UNAMBIG_TASKS
+# list of unambiguous tasks (see thesis)
 UNAMBIG_TASKS = [0, 2, 3, 4, 7, 8]
+# Variable: ALGORITHMS
+# list of algorithm names
 ALGORITHMS = ["IA", "RDT", "SE"]
+# Variable: LINESTYLES
+# dictionary mapping algorithm names to matplotlib
+# linestyles to use for plots
 LINESTYLES = {"IA": "-", "RDT": "dotted", "SE": "--"}
 
 def eval_log():
-	"""Prints and visualizes category_counts from the questionnaires."""
+	"""Func: eval_log
+	Evaluates the GOLMI logs: print statistics and creates plots
+	for incorrect attempts and time needed by participants.
+	"""
 	log = read_logs()
 	eval_incorrect_attempts(log, tasks=UNAMBIG_TASKS)
-	#eval_time_to_solve(log, tasks=UNAMBIG_TASKS)
+	eval_time_to_solve(log, tasks=UNAMBIG_TASKS)
 	
 ### read data ###
 
 def read_logs():
-	"""Reads in all json files and extract task logs.
+	"""Func: read_logs
+	Reads in all json files and extract task logs.
 	
-	@return dict mapping algorithm to dictionary with entries 'log', 'target', 'incorrect attempts'
+	Returns:
+	_dict_ mapping algorithm to _dict_ with entries 'log',
+	'target', 'incorrect attempts'
 	"""
 	data = {alg: list() for alg in ALGORITHMS}
 	# walk the directory and read in each file
@@ -64,10 +86,14 @@ def read_logs():
 ### attempts per task ###
 
 def eval_incorrect_attempts(log, tasks=list(range(N_TASKS))):
-	"""Prints out information on the attempts needed by participants to solve each task.
+	"""Func: eval_incorrect_attempts
+	Prints out information on the attempts needed by participants
+	to solve each task.
 	
-	@param log	parsed log data
-	@param tasks	optional: task indexes to include
+	Params:
+	log - parsed log data
+	tasks - optional: task indexes to include
+		*default*: indices 0 to <N_TASKS> -1
 	"""
 	# relevant key in the log
 	attempt_key = "incorrectAttempts"
@@ -100,10 +126,14 @@ def eval_incorrect_attempts(log, tasks=list(range(N_TASKS))):
 		y_axislabel="Average incorrect attempts", linestyles=LINESTYLES)
 
 def eval_time_to_solve(log, tasks=list(range(N_TASKS))):
-	"""Prints out information on the time participants needed to solve tasks as well as the number of instructions given.
+	"""Func: eval_time_to_solve
+	Prints out information on the time participants needed
+	to solve tasks as well as the number of instructions given.
 	
-	@param log	parsed log data
-	@param tasks	optional: task indexes to include
+	Params:
+	log - parsed log data
+	tasks - optional: task indexes to include.
+		*default*: indices 0 to <N_TASKS> -1
 	"""
 	log_key = "log"
 	alg_feedback_averages = {alg:list() for alg in ALGORITHMS}

@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("JavaScriptClass:Domain","Domain");NDSummary.OnSummaryLoaded("JavaScriptClass:Domain",[["JavaScript","JavaScript"]],[["Classes","Class"],["Functions","Function"],["Groups","Group"]],[[250,0,0,"Domain"],[251,0,2,"Functions","Functions"],[252,0,1,"Constructor","Constructor"]]);
