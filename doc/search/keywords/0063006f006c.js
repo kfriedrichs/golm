@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("col",["Variable"],[["COLORS",,[[,,,,0,"File:scripts/eval_log.py:COLORS"]]]]);

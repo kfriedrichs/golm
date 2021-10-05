@@ -59,6 +59,18 @@
  <div class="CBody"><p>dictionary mapping algorithm names to matplotlib linestyles to use for plots</p></div>
 </div>
 
+<a name="MARKERSTYLES"></a><a name="Topic255"></a><div class="CTopic TVariable LPython">
+ <div class="CTitle">MARKERSTYLES</div>
+ <div id="NDPrototype255" class="NDPrototype"><div class="PSection PPlainSection">MARKERSTYLES</div></div>
+ <div class="CBody"><p>dictionary mapping algorithm names to matplotlib markers to use for scatter plots</p></div>
+</div>
+
+<a name="COLORS"></a><a name="Topic256"></a><div class="CTopic TVariable LPython">
+ <div class="CTitle">COLORS</div>
+ <div id="NDPrototype256" class="NDPrototype"><div class="PSection PPlainSection">COLORS</div></div>
+ <div class="CBody"><p>dictionary mapping algorithm names to colors to use for scatter plots</p></div>
+</div>
+
 <a name="Functions"></a><a name="Topic134"></a><div class="CTopic TGroup LPython">
  <div class="CTitle">Functions</div>
 </div>
@@ -73,14 +85,14 @@
  <div class="CBody"><p>Reads in all json files and extract task logs.</p><div class="CHeading">Returns</div><p><u>dict</u> mapping algorithm to <u>dict</u> with entries 'log', 'target', 'incorrect attempts'</p></div>
 </div>
 
-<a name="eval_incorrect_attempts"></a><a name="Topic137"></a><div class="CTopic TFunction LPython">
+<a name="eval_incorrect_attempts"></a><a name="Topic259"></a><div class="CTopic TFunction LPython">
  <div class="CTitle">eval_incorrect_attempts</div>
- <div class="CBody"><p>Prints out information on the attempts needed by participants to solve each task.</p><div class="CHeading">Params</div><table class="CDefinitionList"><tr><td class="CDLEntry">log</td><td class="CDLDefinition"><p>parsed log data</p></td></tr><tr><td class="CDLEntry">tasks</td><td class="CDLDefinition"><p>optional: task indexes to include <b>default</b>: indices 0 to <a href="../../index.html#File:scripts/eval_log.py:N_TASKS" target="_top" onmouseover="NDContentPage.OnLinkMouseOver(event,129);" onmouseout="NDContentPage.OnLinkMouseOut(event);" >N_TASKS</a> -1</p></td></tr></table></div>
+ <div class="CBody"><p>Prints out information on the attempts needed by participants to solve each task. One plot is created.</p><div class="CHeading">Params</div><table class="CDefinitionList"><tr><td class="CDLEntry">log</td><td class="CDLDefinition"><p>parsed log data</p></td></tr><tr><td class="CDLEntry">savename</td><td class="CDLDefinition"><p><u>str</u>, name for the plot. The plot file will be called 'incorrect_attempts_NAME.png'.</p></td></tr><tr><td class="CDLEntry">tasks</td><td class="CDLDefinition"><p>optional: task indexes to include <b>default</b>: indices 0 to <a href="../../index.html#File:scripts/eval_log.py:N_TASKS" target="_top" onmouseover="NDContentPage.OnLinkMouseOver(event,129);" onmouseout="NDContentPage.OnLinkMouseOut(event);" >N_TASKS</a> -1</p></td></tr></table></div>
 </div>
 
-<a name="eval_time_to_solve"></a><a name="Topic138"></a><div class="CTopic TFunction LPython last">
+<a name="eval_time_to_solve"></a><a name="Topic260"></a><div class="CTopic TFunction LPython last">
  <div class="CTitle">eval_time_to_solve</div>
- <div class="CBody"><p>Prints out information on the time participants needed to solve tasks as well as the number of instructions given.</p><div class="CHeading">Params</div><table class="CDefinitionList"><tr><td class="CDLEntry">log</td><td class="CDLDefinition"><p>parsed log data</p></td></tr><tr><td class="CDLEntry">tasks</td><td class="CDLDefinition"><p>optional: task indexes to include.&nbsp; <b>default</b>: indices 0 to <a href="../../index.html#File:scripts/eval_log.py:N_TASKS" target="_top" onmouseover="NDContentPage.OnLinkMouseOver(event,129);" onmouseout="NDContentPage.OnLinkMouseOut(event);" >N_TASKS</a> -1</p></td></tr></table></div>
+ <div class="CBody"><p>Prints out information on the time participants needed to solve tasks as well as the number of instructions given.&nbsp; Creates two plots.</p><div class="CHeading">Params</div><table class="CDefinitionList"><tr><td class="CDLEntry">log</td><td class="CDLDefinition"><p>parsed log data</p></td></tr><tr><td class="CDLEntry">savename</td><td class="CDLDefinition"><p><u>str</u>, name for the plot. The plot files will be called 'feedback_NAME.png' and 'time_NAME_png'.</p></td></tr><tr><td class="CDLEntry">tasks</td><td class="CDLDefinition"><p>optional: task indexes to include.&nbsp; <b>default</b>: indices 0 to <a href="../../index.html#File:scripts/eval_log.py:N_TASKS" target="_top" onmouseover="NDContentPage.OnLinkMouseOver(event,129);" onmouseout="NDContentPage.OnLinkMouseOut(event);" >N_TASKS</a> -1</p></td></tr></table></div>
 </div>
 
 </body></html>
