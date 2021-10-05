@@ -42,6 +42,13 @@ ALGORITHMS = ["IA", "RDT", "SE"]
 # dictionary mapping algorithm names to matplotlib
 # linestyles to use for plots
 LINESTYLES = {"IA": "-", "RDT": "dotted", "SE": "--"}
+# Variable: MARKERSTYLES
+# dictionary mapping algorithm names to matplotlib
+# markers to use for scatter plots
+MARKERSTYLES = {"IA": "s", "RDT": "*", "SE": ">"}
+# Variable: COLORS
+# dictionary mapping algorithm names to colors to use for scatter plots
+COLORS = {"IA": "orange", "RDT": "darkblue", "SE": "mediumaquamarine"}
 
 def eval_log():
 	"""Func: eval_log
@@ -49,8 +56,12 @@ def eval_log():
 	for incorrect attempts and time needed by participants.
 	"""
 	log = read_logs()
-	eval_incorrect_attempts(log, tasks=UNAMBIG_TASKS)
-	eval_time_to_solve(log, tasks=UNAMBIG_TASKS)
+	eval_incorrect_attempts(log, "all_tasks")
+	eval_incorrect_attempts(log, "ambig", tasks=AMBIG_TASKS)
+	eval_incorrect_attempts(log, "unambig", tasks=UNAMBIG_TASKS)
+	eval_time_to_solve(log, "all_tasks")
+	eval_time_to_solve(log, "ambig", tasks=AMBIG_TASKS)
+	eval_time_to_solve(log, "unambig", tasks=UNAMBIG_TASKS)
 	
 ### read data ###
 
@@ -85,13 +96,15 @@ def read_logs():
 
 ### attempts per task ###
 
-def eval_incorrect_attempts(log, tasks=list(range(N_TASKS))):
+def eval_incorrect_attempts(log, savename, tasks=list(range(N_TASKS))):
 	"""Func: eval_incorrect_attempts
 	Prints out information on the attempts needed by participants
-	to solve each task.
+	to solve each task. One plot is created.
 	
 	Params:
 	log - parsed log data
+	savename - _str_, name for the plot. The plot file will be called
+		'incorrect_attempts_NAME.png'.
 	tasks - optional: task indexes to include
 		*default*: indices 0 to <N_TASKS> -1
 	"""
@@ -121,17 +134,21 @@ def eval_incorrect_attempts(log, tasks=list(range(N_TASKS))):
 			alg_averages[alg].append(average)
 	# plot
 	create_line(ALGORITHMS, alg_averages, title="Average number of incorrect identifications",
-		savepath=os.path.join(PLOT_PATH, "incorrect_attempts_unambig.png"),
+		savepath=os.path.join(PLOT_PATH, "incorrect_attempts_{}.png".format(savename)),
 		x_ticklabels=list(str(t+1) for t in tasks), x_axislabel="Task No.",
-		y_axislabel="Average incorrect attempts", linestyles=LINESTYLES)
+		y_axislabel="Average incorrect attempts", #y_lim=(0,1),
+		markers=MARKERSTYLES, colors=COLORS)
 
-def eval_time_to_solve(log, tasks=list(range(N_TASKS))):
+def eval_time_to_solve(log, savename, tasks=list(range(N_TASKS))):
 	"""Func: eval_time_to_solve
 	Prints out information on the time participants needed
 	to solve tasks as well as the number of instructions given.
+	Creates two plots.
 	
 	Params:
 	log - parsed log data
+	savename - _str_, name for the plot. The plot files will be called
+		'feedback_NAME.png' and 'time_NAME_png'.
 	tasks - optional: task indexes to include.
 		*default*: indices 0 to <N_TASKS> -1
 	"""
@@ -196,13 +213,15 @@ def eval_time_to_solve(log, tasks=list(range(N_TASKS))):
 				task+1, alg_time_averages[alg][i], n_outliers[i]))
 	# plot
 	create_line(ALGORITHMS, alg_feedback_averages, title="Average feedback messages generated",
-		savepath=os.path.join(PLOT_PATH, "feedback_unambig.png"),
+		savepath=os.path.join(PLOT_PATH, "feedback_{}.png".format(savename)),
 		x_ticklabels=list(str(i+1) for i in tasks), x_axislabel="Task No.",
-		y_axislabel="Av. number of feedback messages", linestyles=LINESTYLES)
+		y_axislabel="Av. number of feedback messages", y_lim=(0,8),
+		markers=MARKERSTYLES, colors=COLORS)
 	create_line(ALGORITHMS, alg_time_averages, title="Average time to identification",
-		savepath=os.path.join(PLOT_PATH, "time_unambig.png"),
+		savepath=os.path.join(PLOT_PATH, "time_{}.png".format(savename)),
 		x_ticklabels=list(str(i+1) for i in tasks), x_axislabel="Task No.",
-		y_axislabel="Av. time to task completion (s)", linestyles=LINESTYLES)
+		y_axislabel="Av. time to task completion (s)", y_lim=(0,20),
+		markers=MARKERSTYLES, colors=COLORS)
 	
 def main():
 	eval_log()

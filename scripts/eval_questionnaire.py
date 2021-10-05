@@ -36,6 +36,13 @@ ALGORITHMS = ["IA", "RDT", "SE"]
 # dictionary mapping algorithm names to matplotlib
 # linestyles to use for plots
 LINESTYLES = {"IA": "-", "RDT": "dotted", "SE": "--"}
+# Variable: MARKERSTYLES
+# dictionary mapping algorithm names to matplotlib
+# markers to use for scatter plots
+MARKERSTYLES = {"IA": "s", "RDT": "*", "SE": ">"}
+# Variable: COLORS
+# dictionary mapping algorithm names to colors to use for scatter plots
+COLORS = {"IA": "orange", "RDT": "darkblue", "SE": "mediumaquamarine"}
 # Variable: KEYS
 # list of keys used in questionnaire
 KEYS = [
@@ -146,7 +153,7 @@ def eval_godspeed(data):
 	print("-"*20 + "\nGodspeed\n" + "-"*20)
 	# map keys used in html to more human-readable ones
 	labels = {
-			"anthropomorphism1": "machinelike/humanlike",
+			"anthropomorphism1": "machine-like/human-like",
 			"anthropomorphism2": "unconscious/conscious",
 			"anthropomorphism3": "artificial/lifelike",
 			"likeability1": "dislike/like",
@@ -175,7 +182,7 @@ def eval_godspeed(data):
 			title="Average perception of {}".format(aspect),
 			savepath=os.path.join(PLOT_PATH, "{}.png".format(aspect)),
 			x_ticklabels=x_ticklabels, y_axislabel="Average rating",
-			y_lim=(1,7), linestyles=LINESTYLES)
+			y_lim=(1,7), markers=MARKERSTYLES, colors=COLORS)
 
 def eval_gender(data):
 	"""Func: eval_gender

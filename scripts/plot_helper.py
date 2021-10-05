@@ -56,7 +56,7 @@ def create_hist(answer_list, title=None, savepath=None, xmin=None,
 	
 def create_line(categories, category_counts, title=None, savepath=None,
 				x_ticklabels=None, x_axislabel=None, y_axislabel=None,
-				y_lim=None, linestyles=None):
+				y_lim=None, linestyles=None, markers=None, colors=None):
 	"""Func: create_line
 	Create a (standard) line plot with one line per category.
 	
@@ -77,7 +77,12 @@ def create_line(categories, category_counts, title=None, savepath=None,
 	y_lim - tuple or None.
 		2-tuple (lower_limit, upper_limit) for y axis.
 	linestyles - _dict_ or None.
-		Define a matplotlib linestyle for each category
+		Define a matplotlib linestyle for each category. If used,
+		data points will be connected.
+	markers - _dict_ or None.
+		Define a matplotlib marker type for each category.
+	colors - _dict_ or None.
+		Define a color for each category. Used for markers.
 	"""
 	fig, ax = plt.subplots(figsize=(7, 5))
 	fig.suptitle(title)
@@ -85,9 +90,16 @@ def create_line(categories, category_counts, title=None, savepath=None,
 	for cat in categories:
 		if linestyles and linestyles[cat]:
 			ax.plot(x_pos, category_counts[cat], label=cat, linestyle=linestyles[cat])
+		elif markers and markers[cat]:
+			if colors and colors[cat]:
+				ax.plot(x_pos, category_counts[cat], label=cat,
+				marker=markers[cat], markersize=13, linestyle="None",
+				c=colors[cat])
+			else:
+				ax.plot(x_pos, category_counts[cat], label=cat,
+				marker=markers[cat], markersize=13, linestyle="None")
 		else:
 			ax.plot(x_pos, category_counts[cat], label=cat)
-		
 	# display line labels
 	ax.legend()
 	ax.set_xlabel(x_axislabel)
