@@ -7,6 +7,7 @@ import time, threading
 
 # Adapted from https://stackoverflow.com/a/48709380
 
+
 class TimedLoop:
     def __init__(self, interval, fn, *args, **kwargs):
         self.interval = interval
@@ -17,6 +18,7 @@ class TimedLoop:
         thread = threading.Thread(target=self._setInterval)
         thread.start()
 
+
     def _setInterval(self):
         # immediately execute once
         self.fn(*self.args, **self.kwargs)
@@ -24,6 +26,7 @@ class TimedLoop:
         while not self.stopEvent.wait(nextTime - time.time()) :
             nextTime += self.interval
             self.fn(*self.args, **self.kwargs)
+
 
     def cancel(self):
         self.stopEvent.set()
