@@ -688,7 +688,6 @@ $(document).ready(function () {
 					this.partition		= partition;
 				}
 			}
-			// Class: IGView
 
 			// create the referential space
 			this.RS = new Set();

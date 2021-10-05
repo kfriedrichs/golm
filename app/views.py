@@ -19,7 +19,6 @@ def index():
     Serve the experiment interface.
     """
     return render_template("index.html")
-# Section:
 
 
 @app.route("/get_tasks/<string:taskname>", methods=["GET"])

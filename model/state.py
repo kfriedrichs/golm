@@ -181,7 +181,6 @@ class State:
         else:
             obj.block_matrix = self.flip_block_matrix(obj.block_matrix)
 
-    # Section:
     def grip(self, gr_id, obj_id):
         """Func: grip
         Attach a given <Obj> to the <Gripper>.
@@ -193,7 +192,6 @@ class State:
         self.objs[obj_id].gripped = True
         self.grippers[gr_id].gripped = obj_id
 
-    # Section:
     def ungrip(self, id):
         """Func: ungrip
         Detach the currently gripped <Obj> from the <Gripper>.

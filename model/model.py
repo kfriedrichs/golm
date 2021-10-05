@@ -46,7 +46,6 @@ class Model:
         """
         return self.state.get_obj_dict()
 
-    # Section:
     def get_object_ids(self):
         """ Func: get_obj_ids
         
@@ -55,7 +54,6 @@ class Model:
         """
         return self.state.get_object_ids()
 
-    # Section:
     def get_obj_by_id(self, id):
         """ Func: get_obj_by_id
         
@@ -67,7 +65,6 @@ class Model:
         """
         return self.state.get_obj_by_id(id)
 
-    # Section:
     def get_gripper_dict(self):
         """Func: get_gripper_dict
         
@@ -76,7 +73,6 @@ class Model:
         """
         return self.state.get_gripper_dict()
 
-    # Section:
     def get_gripper_ids(self):
         """Func: get_gripper_ids
         
@@ -85,7 +81,6 @@ class Model:
         """
         return self.state.get_gripper_ids()
 
-    # Section:
     def get_gripper_by_id(self, id):
         """Func: get_gripper_by_id
         
@@ -97,7 +92,6 @@ class Model:
         """
         return self.state.get_gripper_by_id(id)
 
-    # Section:
     def get_gripper_coords(self, id):
         """Func: get_gripper_coords
         
@@ -109,7 +103,6 @@ class Model:
         """
         return self.state.get_gripper_coords(id)
 
-    # Section:
     def get_gripped_obj(self, id):
         """Func: get_gripped_obj
         
@@ -121,7 +114,6 @@ class Model:
         """
         return self.state.get_gripped_obj(id)
 
-    # Section:
     def get_config(self):
         """Func: get_config
         
@@ -130,7 +122,6 @@ class Model:
         """
         return self.config.to_dict()
 
-    # Section:
     def get_width(self):
         """Func: get_width
         
@@ -139,7 +130,6 @@ class Model:
         """
         return self.config.width
 
-    # Section:
     def get_height(self):
         """Func: get_height
         
@@ -148,7 +138,6 @@ class Model:
         """
         return self.config.height
 
-    # Section:
     def get_type_config(self):
         """Func: get_type_config
         
