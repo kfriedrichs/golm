@@ -59,9 +59,9 @@ def eval_log():
     eval_incorrect_attempts(log, "all_tasks")
     eval_incorrect_attempts(log, "ambig", tasks=AMBIG_TASKS)
     eval_incorrect_attempts(log, "unambig", tasks=UNAMBIG_TASKS)
-    eval_time_to_solve(log, "all_tasks")
-    eval_time_to_solve(log, "ambig", tasks=AMBIG_TASKS)
-    eval_time_to_solve(log, "unambig", tasks=UNAMBIG_TASKS)
+    #eval_time_to_solve(log, "all_tasks")
+    #eval_time_to_solve(log, "ambig", tasks=AMBIG_TASKS)
+    #eval_time_to_solve(log, "unambig", tasks=UNAMBIG_TASKS)
 
 
 # --- read data --- #
@@ -116,6 +116,7 @@ def eval_incorrect_attempts(log, savename, tasks=list(range(N_TASKS))):
     # relevant key in the log
     attempt_key = "incorrectAttempts"
     alg_averages = {alg: list() for alg in ALGORITHMS}
+    alg_average_no_of_failed_identifications = {alg: list() for alg in ALGORITHMS}
     # read in log, target, attempts for each task
     for alg in log:
         print("-" * 5 + "\t" + alg + "\t" + "-" * 5)
@@ -123,11 +124,20 @@ def eval_incorrect_attempts(log, savename, tasks=list(range(N_TASKS))):
         all_attempts = 0
         # attempts per task
         task_attempts = [0 for _ in tasks]
+        # number of tasks where correct piece was not identified at all
+        failed_identification = [0 for _ in tasks]
 
         for run in log[alg]:
             for i, task in enumerate(tasks):
-                all_attempts += run[task][attempt_key]
-                task_attempts[i] += run[task][attempt_key]
+                attempts = run[task][attempt_key]
+                all_attempts += attempts
+                task_attempts[i] += attempts
+                if attempts == 3:
+                    # check if final selection was correct
+                    assert "gripper" in run[task]["log"][-1][1] and "gripped" in run[task]["log"][-1][1]["gripper"], \
+                        "Unexpected final log entry; expected gripped object"
+                    if str(run[task]["target"]) != str(run[task]["log"][-1][1]["gripper"]["gripped"]):
+                        failed_identification[i] += 1
 
         # print the results
         n_runs = len(log[alg])
@@ -138,6 +148,12 @@ def eval_incorrect_attempts(log, savename, tasks=list(range(N_TASKS))):
             average = task_attempts[i] / n_runs
             print("Task {}: {}".format(task, average))
             alg_averages[alg].append(average)
+        print("Number of failed identifications:")
+        for i, task in enumerate(tasks):
+            # normalize number of fails by number of runs per algorithm
+            alg_average_no_of_failed_identifications[alg].append(failed_identification[i] / n_runs)
+            print("Task {}: {}".format(task, failed_identification[i]))
+
     # plot
     create_line(ALGORITHMS, alg_averages,
                 title="Average number of incorrect identifications",
@@ -146,6 +162,14 @@ def eval_incorrect_attempts(log, savename, tasks=list(range(N_TASKS))):
                 x_ticklabels=list(str(t + 1) for t in tasks),
                 x_axislabel="Task No.",
                 y_axislabel="Average incorrect attempts", #y_lim=(0, 1),
+                markers=MARKERSTYLES, colors=COLORS)
+    create_line(ALGORITHMS, alg_average_no_of_failed_identifications,
+                title="Percentage of failed tasks (3 incorrect attempts)",
+                savepath=os.path.join(PLOT_PATH,
+                    "failed_attempts_{}.png".format(savename)),
+                x_ticklabels=list(str(t + 1) for t in tasks),
+                x_axislabel="Task No.",
+                y_axislabel="Percentage of failed tasks", y_lim=(0, 0.5),
                 markers=MARKERSTYLES, colors=COLORS)
 
 
