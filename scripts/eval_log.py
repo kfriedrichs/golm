@@ -59,9 +59,9 @@ def eval_log():
     eval_incorrect_attempts(log, "all_tasks")
     eval_incorrect_attempts(log, "ambig", tasks=AMBIG_TASKS)
     eval_incorrect_attempts(log, "unambig", tasks=UNAMBIG_TASKS)
-    #eval_time_to_solve(log, "all_tasks")
-    #eval_time_to_solve(log, "ambig", tasks=AMBIG_TASKS)
-    #eval_time_to_solve(log, "unambig", tasks=UNAMBIG_TASKS)
+    eval_time_to_solve(log, "all_tasks")
+    eval_time_to_solve(log, "ambig", tasks=AMBIG_TASKS)
+    eval_time_to_solve(log, "unambig", tasks=UNAMBIG_TASKS)
 
 
 # --- read data --- #
