@@ -1,3 +1,7 @@
+**The algorithms presented in the SemDial 2022 publication "Interactive and Cooperative Delivery of
+Referring Expressions: A Comparison of Three Algorithms" can be found in 
+[app/static/js/view/IGView.js](./app/static/js/view/IGView.js)**.
+
 # Modeling collaborative reference in a Pentomino domain using the GOLMI framework
 
 This repository is an extension to the 
@@ -11,7 +15,9 @@ together with an instruction giving agent, which randomly uses one of the
 tested algorithms.
 
 For more information on the choice of algorithms and implementation details,
-please consult the thesis.
+please consult the publication 
+**Interactive and Cooperative Delivery of Referring Expressions: A Comparison of Three Algorithms**
+or my thesis.
 For more information on GOLMI, please refer to its 
 [main repository](https://github.com/clp-research/golmi). 
 
